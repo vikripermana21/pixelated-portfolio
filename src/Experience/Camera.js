@@ -8,6 +8,7 @@ export default class Camera {
     this.sizes = this.experience.sizes;
     this.scene = this.experience.scene;
     this.canvas = this.experience.canvas;
+    this.time = this.experience.time;
 
     this.setInstance();
     this.setControls();
@@ -15,10 +16,10 @@ export default class Camera {
 
   setInstance() {
     this.instance = new OrthographicCamera(
-      this.sizes.width / (-100 * 2),
-      this.sizes.width / (100 * 2),
-      this.sizes.height / (100 * 2),
-      this.sizes.height / (-100 * 2),
+      this.sizes.width / -50,
+      this.sizes.width / 50,
+      this.sizes.height / 50,
+      this.sizes.height / -50,
       -20,
       1000,
     );

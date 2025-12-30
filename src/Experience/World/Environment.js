@@ -35,6 +35,13 @@ export default class Environment {
   setDirectionalLight() {
     this.directionalLight = new THREE.DirectionalLight();
     this.directionalLight.position.x = 5;
+    this.directionalLight.position.y = 5;
+    this.directionalLight.position.z = -5;
+    this.directionalLight.castShadow = true;
+    this.directionalLight.shadow.mapSize.width = 4096;
+    this.directionalLight.shadow.mapSize.height = 4096;
+    this.directionalLight.shadow.camera.near = 2;
+    this.directionalLight.shadow.camera.far = 15;
     this.scene.add(this.directionalLight);
   }
 

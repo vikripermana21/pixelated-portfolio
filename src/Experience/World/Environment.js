@@ -10,6 +10,7 @@ export default class Environment {
     this.experience = new Experience();
     this.debug = this.experience.debug;
     this.scene = this.experience.scene;
+    this.time = this.experience.time;
 
     this.setAmbientLight();
     this.setDirectionalLight();
@@ -34,19 +35,27 @@ export default class Environment {
 
   setDirectionalLight() {
     this.directionalLight = new THREE.DirectionalLight();
-    this.directionalLight.position.x = 5;
-    this.directionalLight.position.y = 5;
-    this.directionalLight.position.z = -5;
+    this.directionalLight.position.x = 25;
+    this.directionalLight.position.y = 25;
+    this.directionalLight.position.z = -25;
+    this.directionalLight.lookAt(new THREE.Vector3());
     this.directionalLight.castShadow = true;
     this.directionalLight.shadow.mapSize.width = 4096;
     this.directionalLight.shadow.mapSize.height = 4096;
-    this.directionalLight.shadow.camera.near = 2;
-    this.directionalLight.shadow.camera.far = 15;
+    this.directionalLight.shadow.camera.near = -1;
+    this.directionalLight.shadow.camera.far = 1000;
     this.scene.add(this.directionalLight);
+    this.directionalLightHelper = new THREE.DirectionalLightHelper(
+      this.directionalLight,
+    );
+    this.scene.add(this.directionalLightHelper);
   }
 
   update() {
     this.ambientLight.intensity = this.params.ambientLightIntensity;
     this.directionalLight.intensity = this.params.directionalLightIntensity;
+    this.directionalLight.lookAt(new THREE.Vector3());
+    // this.directionalLight.position.x = Math.sin(this.time.elapsed * 0.001) * 25;
+    // this.directionalLight.position.z = Math.cos(this.time.elapsed * 0.001) * 25;
   }
 }

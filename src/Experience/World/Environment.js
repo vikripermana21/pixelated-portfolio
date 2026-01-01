@@ -14,6 +14,7 @@ export default class Environment {
 
     this.setAmbientLight();
     this.setDirectionalLight();
+    this.setPointLight();
   }
 
   setAmbientLight() {
@@ -42,20 +43,36 @@ export default class Environment {
     this.directionalLight.castShadow = true;
     this.directionalLight.shadow.mapSize.width = 4096;
     this.directionalLight.shadow.mapSize.height = 4096;
+    this.directionalLight.shadow.camera.left = -100;
+    this.directionalLight.shadow.camera.right = 100;
+    this.directionalLight.shadow.camera.top = 100;
+    this.directionalLight.shadow.camera.bottom = -100;
     this.directionalLight.shadow.camera.near = -1;
     this.directionalLight.shadow.camera.far = 1000;
     this.scene.add(this.directionalLight);
-    this.directionalLightHelper = new THREE.DirectionalLightHelper(
-      this.directionalLight,
-    );
-    this.scene.add(this.directionalLightHelper);
+    // this.directionalLightHelper = new THREE.DirectionalLightHelper(
+    //   this.directionalLight,
+    // );
+    // this.scene.add(this.directionalLightHelper);
+  }
+
+  setPointLight() {
+    this.pointLight = new THREE.PointLight(new THREE.Color(0xff0000), 100);
+    this.pointLight.position.y = 100;
+    this.pointLight.position.x = 2;
+    this.pointLight.position.z = 1;
+    this.scene.add(this.pointLight);
+
+    this.pointLightHelper = new THREE.PointLightHelper(this.pointLight);
+    this.scene.add(this.pointLightHelper);
   }
 
   update() {
     this.ambientLight.intensity = this.params.ambientLightIntensity;
     this.directionalLight.intensity = this.params.directionalLightIntensity;
     this.directionalLight.lookAt(new THREE.Vector3());
-    // this.directionalLight.position.x = Math.sin(this.time.elapsed * 0.001) * 25;
-    // this.directionalLight.position.z = Math.cos(this.time.elapsed * 0.001) * 25;
+    this.pointLight.position.y = 7 + Math.sin(this.time.elapsed * 0.001);
+    this.pointLight.rotation.x = Math.sin(this.time.elapsed * 0.001);
+    this.pointLight.rotation.z = Math.cos(this.time.elapsed * 0.001);
   }
 }

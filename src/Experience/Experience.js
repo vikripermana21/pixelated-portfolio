@@ -7,6 +7,7 @@ import * as THREE from "three";
 import World from "./World/World";
 import sources from "./sources";
 import Debug from "./Utils/Debug";
+import Composer from "./Composer";
 
 let instance;
 export default class Experience {
@@ -17,6 +18,8 @@ export default class Experience {
     }
     instance = this;
 
+    this.outlineObject = [];
+
     this.canvas = _canvas;
 
     this.debug = new Debug();
@@ -26,6 +29,7 @@ export default class Experience {
     this.resources = new Resources(sources);
     this.camera = new Camera();
     this.renderer = new Renderer();
+    this.composer = new Composer();
     this.world = new World();
 
     this.sizes.on("resize", () => {
@@ -45,6 +49,6 @@ export default class Experience {
   update() {
     this.camera.update();
     this.world.update();
-    this.renderer.update();
+    this.composer.update();
   }
 }

@@ -9,6 +9,9 @@ uniform vec3 uColor;
 varying vec4 vShadowCoord;
 
 void main() {
+  // Directional light
+  DirectionalLight directionalLight = directionalLights[0];
+
   // shadow map
   DirectionalLightShadow directionalShadow = directionalLightShadows[0];
 
@@ -20,10 +23,11 @@ void main() {
     directionalShadow.shadowRadius,
     vShadowCoord
   );
+vec3 diffuse = uColor * directionalLight.color;
+  vec3 ambient = uColor * ambientLightColor ;
+  vec3 color = ambient + diffuse * shadow ;
 
-  vec3 color = uColor * 0.32 ;
-
-  gl_FragColor = vec4(color * (ambientLightColor + shadow),1.0);
+  gl_FragColor = vec4(color * 0.32,1.0);
 
     #include <tonemapping_fragment>
     #include <colorspace_fragment>

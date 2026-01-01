@@ -171,22 +171,6 @@
 			]
 		}
 	],
-	"materials":[
-		{
-			"doubleSided":true,
-			"name":"Material",
-			"pbrMetallicRoughness":{
-				"baseColorFactor":[
-					0.800000011920929,
-					0.800000011920929,
-					0.800000011920929,
-					1
-				],
-				"metallicFactor":0,
-				"roughnessFactor":0.5
-			}
-		}
-	],
 	"meshes":[
 		{
 			"name":"Cube",
@@ -206,7 +190,6 @@
 						}
 					},
 					"indices":2,
-					"material":0,
 					"mode":4
 				}
 			]
@@ -229,7 +212,6 @@
 						}
 					},
 					"indices":5,
-					"material":0,
 					"mode":4
 				}
 			]
@@ -252,7 +234,6 @@
 						}
 					},
 					"indices":2,
-					"material":0,
 					"mode":4
 				}
 			]
@@ -275,7 +256,6 @@
 						}
 					},
 					"indices":10,
-					"material":0,
 					"mode":4
 				}
 			]
@@ -319,8 +299,7 @@
 							}
 						}
 					},
-					"indices":16,
-					"material":0,
+					"indices":10,
 					"mode":4
 				}
 			]
@@ -330,8 +309,8 @@
 			"primitives":[
 				{
 					"attributes":{
-						"POSITION":17,
-						"NORMAL":18
+						"POSITION":16,
+						"NORMAL":17
 					},
 					"extensions":{
 						"KHR_draco_mesh_compression":{
@@ -342,7 +321,7 @@
 							}
 						}
 					},
-					"indices":19,
+					"indices":18,
 					"mode":4
 				}
 			]
@@ -352,8 +331,8 @@
 			"primitives":[
 				{
 					"attributes":{
-						"POSITION":20,
-						"NORMAL":21
+						"POSITION":19,
+						"NORMAL":20
 					},
 					"extensions":{
 						"KHR_draco_mesh_compression":{
@@ -364,7 +343,7 @@
 							}
 						}
 					},
-					"indices":22,
+					"indices":21,
 					"mode":4
 				}
 			]
@@ -374,8 +353,8 @@
 			"primitives":[
 				{
 					"attributes":{
-						"POSITION":23,
-						"NORMAL":24
+						"POSITION":22,
+						"NORMAL":23
 					},
 					"extensions":{
 						"KHR_draco_mesh_compression":{
@@ -386,7 +365,7 @@
 							}
 						}
 					},
-					"indices":25,
+					"indices":24,
 					"mode":4
 				}
 			]
@@ -396,8 +375,8 @@
 			"primitives":[
 				{
 					"attributes":{
-						"POSITION":26,
-						"NORMAL":27
+						"POSITION":25,
+						"NORMAL":26
 					},
 					"extensions":{
 						"KHR_draco_mesh_compression":{
@@ -408,7 +387,7 @@
 							}
 						}
 					},
-					"indices":28,
+					"indices":27,
 					"mode":4
 				}
 			]
@@ -491,7 +470,7 @@
 			"max":[
 				1.0059384107589722,
 				2.207136869430542,
-				0.9765713810920715
+				0.9766738414764404
 			],
 			"min":[
 				-0.978227972984314,
@@ -512,27 +491,27 @@
 		},
 		{
 			"componentType":5126,
-			"count":1248,
+			"count":1442,
 			"max":[
-				5.282895088195801,
-				-0.6293308734893799,
-				4.016319274902344
+				5.312583923339844,
+				-0.2804776430130005,
+				3.988711357116699
 			],
 			"min":[
-				-5.2810444831848145,
+				-5.2651567459106445,
 				-1.0985187292099,
-				-3.929208993911743
+				-3.9399912357330322
 			],
 			"type":"VEC3"
 		},
 		{
 			"componentType":5126,
-			"count":1248,
+			"count":1442,
 			"type":"VEC3"
 		},
 		{
 			"componentType":5123,
-			"count":1326,
+			"count":1506,
 			"type":"SCALAR"
 		},
 		{
@@ -556,33 +535,28 @@
 			"type":"VEC3"
 		},
 		{
-			"componentType":5123,
-			"count":798,
-			"type":"SCALAR"
-		},
-		{
 			"componentType":5126,
-			"count":1242,
+			"count":1110,
 			"max":[
 				4.814302444458008,
 				1.5828908681869507,
-				4.80307674407959
+				4.7820563316345215
 			],
 			"min":[
-				-4.8050642013549805,
-				-1.0665825605392456,
-				-4.7790374755859375
+				-4.804957866668701,
+				-1.0434675216674805,
+				-4.785399913787842
 			],
 			"type":"VEC3"
 		},
 		{
 			"componentType":5126,
-			"count":1242,
+			"count":1110,
 			"type":"VEC3"
 		},
 		{
 			"componentType":5123,
-			"count":1242,
+			"count":1110,
 			"type":"SCALAR"
 		},
 		{
@@ -679,43 +653,43 @@
 		},
 		{
 			"buffer":0,
-			"byteLength":5086,
+			"byteLength":5078,
 			"byteOffset":21912
 		},
 		{
 			"buffer":0,
-			"byteLength":7233,
-			"byteOffset":27000
+			"byteLength":8367,
+			"byteOffset":26992
 		},
 		{
 			"buffer":0,
 			"byteLength":5078,
-			"byteOffset":34236
+			"byteOffset":35360
 		},
 		{
 			"buffer":0,
-			"byteLength":7601,
-			"byteOffset":39316
+			"byteLength":6800,
+			"byteOffset":40440
 		},
 		{
 			"buffer":0,
 			"byteLength":2214,
-			"byteOffset":46920
+			"byteOffset":47240
 		},
 		{
 			"buffer":0,
 			"byteLength":842,
-			"byteOffset":49136
+			"byteOffset":49456
 		},
 		{
 			"buffer":0,
 			"byteLength":1733,
-			"byteOffset":49980
+			"byteOffset":50300
 		}
 	],
 	"buffers":[
 		{
-			"byteLength":51716,
+			"byteLength":52036,
 			"uri":"pillars.bin"
 		}
 	]

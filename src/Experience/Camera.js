@@ -26,6 +26,7 @@ export default class Camera {
     this.instance.position.x = 50;
     this.instance.position.y = 50;
     this.instance.position.z = 50;
+    this.instance.layers.enableAll();
     this.scene.add(this.instance);
   }
 

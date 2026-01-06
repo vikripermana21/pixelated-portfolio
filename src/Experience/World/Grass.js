@@ -30,6 +30,7 @@ export default class Grass {
     });
 
     this.instance = new THREE.InstancedMesh(this.geo, this.mat, this.count);
+    this.instance.layers.set(1);
     this.instance.receiveShadow = true;
 
     this.dummy = new THREE.Object3D();

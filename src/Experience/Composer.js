@@ -2,6 +2,7 @@ import {
   EffectComposer,
   OutputPass,
   RenderPass,
+  RenderPixelatedPass,
 } from "three/examples/jsm/Addons.js";
 import Experience from "./Experience";
 import PixelationPass from "./Postprocessing/Pixelation";
@@ -26,12 +27,10 @@ export default class Composer {
 
     // Pixelated Pass
     this.pixelatedPass = new PixelationPass(
-      3,
+      4,
       this.scene,
       this.camera.instance,
     );
-    this.pixelatedPass.depthEdgeStrength = 5;
-    this.pixelatedPass.normalEdgeStrength = 5;
     this.instance.addPass(this.pixelatedPass);
 
     // Output Pass

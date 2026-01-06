@@ -57,11 +57,11 @@ export default class Environment {
   }
 
   setPointLight() {
-    this.pointLight = new THREE.PointLight(new THREE.Color(0xff0000), 100);
+    this.pointLight = new THREE.PointLight(new THREE.Color(0x000099), 100);
     this.pointLight.position.y = 100;
     this.pointLight.position.x = 2;
     this.pointLight.position.z = 1;
-    this.scene.add(this.pointLight);
+    // this.scene.add(this.pointLight);
 
     this.pointLightHelper = new THREE.PointLightHelper(this.pointLight);
     this.scene.add(this.pointLightHelper);

@@ -7,10 +7,13 @@ export default class Floor {
       color: "#2e8b57",
     };
     this.experience = new Experience();
+    this.resources = this.experience.resources;
     this.debug = this.experience.debug;
     this.scene = this.experience.scene;
     this.grassUniforms =
       this.experience?.world?.grass?.instance?.material?.uniforms?.uColor;
+
+    this.gradientMap = this.resources.items.gradientMap;
 
     this.setParams();
     this.setInstance();
@@ -28,6 +31,7 @@ export default class Floor {
     this.geo = new THREE.PlaneGeometry(300, 300);
     this.mat = new THREE.MeshToonMaterial({
       color: this.params.color,
+      gradientMap: this.gradientMap,
     });
 
     this.instance = new THREE.Mesh(this.geo, this.mat);

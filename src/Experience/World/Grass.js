@@ -2,6 +2,7 @@ import Experience from "../Experience";
 import * as THREE from "three";
 import vertexShader from "../Shaders/Toon/toon.vert";
 import fragmentShader from "../Shaders/Toon/toon.frag";
+import { instancedDynamicBufferAttribute } from "three/tsl";
 
 export default class Grass {
   constructor() {
@@ -13,20 +14,32 @@ export default class Grass {
     this.scene = this.experience.scene;
     this.camera = this.experience.camera;
     this.debug = this.experience.debug;
+    this.resources = this.experience.resources;
+
+    this.alphaGrass = this.resources.items.alphaGrass;
+    this.alphaGrass.minFilter = THREE.NearestFilter;
+    this.alphaGrass.magFilter = THREE.NearestFilter;
+    this.alphaGrass.generateMipmaps = false;
+    this.alphaGrass.wrapS = THREE.ClampToEdgeWrapping;
+    this.alphaGrass.wrapT = THREE.ClampToEdgeWrapping;
 
     this.setInstance();
   }
 
   setInstance() {
-    this.geo = new THREE.PlaneGeometry(1, 1);
+    this.geo = new THREE.PlaneGeometry(1.5, 1.5);
     this.mat = new THREE.ShaderMaterial({
       lights: true,
       uniforms: {
         ...THREE.UniformsLib.lights,
         uColor: { value: new THREE.Color(this.params.color) },
+        uAlphaGrass: { value: this.alphaGrass },
       },
       vertexShader,
       fragmentShader,
+      transparent: true,
+      depthTest: true,
+      depthWrite: true,
     });
 
     this.instance = new THREE.InstancedMesh(this.geo, this.mat, this.count);
@@ -38,7 +51,7 @@ export default class Grass {
 
     for (let i = 0; i < this.count; i++) {
       this.dummy.position.x = (0.5 - Math.random()) * 50;
-      this.dummy.position.y = 0.5;
+      this.dummy.position.y = 1.5 / 2;
       this.dummy.position.z = (0.5 - Math.random()) * 50;
       this.dummy.updateMatrix();
       this.instance.setMatrixAt(i, this.dummy.matrix);

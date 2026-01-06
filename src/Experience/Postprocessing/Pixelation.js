@@ -88,7 +88,9 @@ class PixelationPass extends Pass {
     this._beautyRenderTarget.texture.minFilter = NearestFilter;
     this._beautyRenderTarget.texture.magFilter = NearestFilter;
     this._beautyRenderTarget.texture.type = HalfFloatType;
-    this._beautyRenderTarget.depthTexture = new DepthTexture();
+
+    this._depthRenderTarget = new WebGLRenderTarget();
+    this._depthRenderTarget.depthTexture = new DepthTexture();
 
     this._normalRenderTarget = new WebGLRenderTarget();
     this._normalRenderTarget.texture.minFilter = NearestFilter;
@@ -126,6 +128,7 @@ class PixelationPass extends Pass {
     );
     const { x, y } = this._renderResolution;
     this._beautyRenderTarget.setSize(x, y);
+    this._depthRenderTarget.setSize(x, y);
     this._normalRenderTarget.setSize(x, y);
     this._fsQuad.material.uniforms.resolution.value.set(x, y, 1 / x, 1 / y);
   }
@@ -159,20 +162,26 @@ class PixelationPass extends Pass {
     renderer.setRenderTarget(this._beautyRenderTarget);
     renderer.render(this.scene, this.camera);
 
-    const overrideMaterial_old = this.scene.overrideMaterial;
-    renderer.setRenderTarget(this._normalRenderTarget);
     // render only layer 0 (exclude grass)
     const oldMask = this.camera.layers.mask;
     this.camera.layers.set(0);
-    this.scene.overrideMaterial = this._normalMaterial;
+
+    renderer.setRenderTarget(this._depthRenderTarget);
     renderer.render(this.scene, this.camera);
+    const overrideMaterial_old = this.scene.overrideMaterial;
+
+    renderer.setRenderTarget(this._normalRenderTarget);
+
+    this.scene.overrideMaterial = this._normalMaterial;
+
+    renderer.render(this.scene, this.camera);
+
     // restore state
     this.scene.overrideMaterial = overrideMaterial_old;
     this.camera.layers.mask = oldMask;
-    this.scene.overrideMaterial = overrideMaterial_old;
 
     uniforms.tDiffuse.value = this._beautyRenderTarget.texture;
-    uniforms.tDepth.value = this._beautyRenderTarget.depthTexture;
+    uniforms.tDepth.value = this._depthRenderTarget.depthTexture;
     uniforms.tNormal.value = this._normalRenderTarget.texture;
 
     if (this.renderToScreen) {

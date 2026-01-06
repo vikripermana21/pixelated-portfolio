@@ -2,7 +2,7 @@
 #include <shadowmap_pars_vertex>
 
 varying vec4 vShadowCoord;
-
+varying vec2 vUv;
 
 void main() {
     #include <beginnormal_vertex>
@@ -19,6 +19,7 @@ void main() {
     vec4 worldOrigin = modelMatrix * instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0);
 
     vShadowCoord = directionalShadowMatrix[0] * worldOrigin;
+    vUv = uv;
 
     gl_Position = clipPosition;
 

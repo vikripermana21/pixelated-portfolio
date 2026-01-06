@@ -9,6 +9,7 @@ export default class Pillars {
     this.layers = this.experience.layers;
 
     this.resource = this.resources.items.pillarsModel;
+    this.gradientMap = this.resources.items.gradientMap;
     this.setModel();
   }
 
@@ -22,7 +23,10 @@ export default class Pillars {
     this.model.traverse((child) => {
       if (child instanceof THREE.Mesh) {
         child.castShadow = true;
-        this.experience.outlineObject.push(child);
+        child.material = new THREE.MeshToonMaterial({
+          color: 0x575a57,
+          gradientMap: this.gradientMap,
+        });
       }
     });
   }

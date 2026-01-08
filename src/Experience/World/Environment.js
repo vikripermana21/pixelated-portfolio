@@ -18,17 +18,18 @@ export default class Environment {
   }
 
   setAmbientLight() {
-    this.debug.ui.addBinding(this.params, "ambientLightIntensity", {
-      min: 0,
-      max: 10,
-      step: 0.1,
-    });
-    this.debug.ui.addBinding(this.params, "directionalLightIntensity", {
-      min: 0,
-      max: 10,
-      step: 0.1,
-    });
-
+    if (this.debug.active) {
+      this.debug.ui.addBinding(this.params, "ambientLightIntensity", {
+        min: 0,
+        max: 10,
+        step: 0.1,
+      });
+      this.debug.ui.addBinding(this.params, "directionalLightIntensity", {
+        min: 0,
+        max: 10,
+        step: 0.1,
+      });
+    }
     this.ambientLight = new THREE.AmbientLight();
     this.ambientLight.intensity = this.params.ambientLightIntensity;
     this.scene.add(this.ambientLight);

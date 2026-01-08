@@ -20,11 +20,13 @@ export default class Floor {
   }
 
   setParams() {
-    this.debug.ui.addBinding(this.params, "color").on("change", (ev) => {
-      this.instance.material.color.set(new THREE.Color(ev.value));
-      this.experience.world.grass.instance.material.uniforms.uColor.value =
-        new THREE.Color(ev.value);
-    });
+    if (this.debug.active) {
+      this.debug.ui.addBinding(this.params, "color").on("change", (ev) => {
+        this.instance.material.color.set(new THREE.Color(ev.value));
+        this.experience.world.grass.instance.material.uniforms.uColor.value =
+          new THREE.Color(ev.value);
+      });
+    }
   }
 
   setInstance() {

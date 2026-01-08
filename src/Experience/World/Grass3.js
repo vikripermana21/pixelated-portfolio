@@ -3,26 +3,37 @@ import * as THREE from "three";
 import vertexShader from "../Shaders/Toon/toon.vert";
 import fragmentShader from "../Shaders/Toon/toon.frag";
 
-export default class Grass {
+export default class Grass3 {
   constructor() {
     this.params = {
-      color: "#2e8b57",
+      color: "#27794b",
     };
-    this.count = 1000;
+    this.count = 100;
     this.experience = new Experience();
     this.scene = this.experience.scene;
     this.camera = this.experience.camera;
     this.debug = this.experience.debug;
     this.resources = this.experience.resources;
 
-    this.alphaGrass = this.resources.items.alphaGrass;
-    this.alphaGrass.minFilter = THREE.NearestFilter;
-    this.alphaGrass.magFilter = THREE.NearestFilter;
-    this.alphaGrass.generateMipmaps = false;
-    this.alphaGrass.wrapS = THREE.ClampToEdgeWrapping;
-    this.alphaGrass.wrapT = THREE.ClampToEdgeWrapping;
+    this.alphaGrass3 = this.resources.items.alphaGrass3;
+    this.alphaGrass3.minFilter = THREE.NearestFilter;
+    this.alphaGrass3.magFilter = THREE.NearestFilter;
+    this.alphaGrass3.generateMipmaps = false;
+    this.alphaGrass3.wrapS = THREE.ClampToEdgeWrapping;
+    this.alphaGrass3.wrapT = THREE.ClampToEdgeWrapping;
 
+    this.setParams();
     this.setInstance();
+  }
+
+  setParams() {
+    if (this.debug.active) {
+      this.debug.ui.addBinding(this.params, "color").on("change", (ev) => {
+        this.instance.material.uniforms.uColor.value = new THREE.Color(
+          ev.value,
+        );
+      });
+    }
   }
 
   setInstance() {
@@ -32,7 +43,7 @@ export default class Grass {
       uniforms: {
         ...THREE.UniformsLib.lights,
         uColor: { value: new THREE.Color(this.params.color) },
-        uAlphaGrass: { value: this.alphaGrass },
+        uAlphaGrass: { value: this.alphaGrass3 },
       },
       vertexShader,
       fragmentShader,
@@ -49,9 +60,9 @@ export default class Grass {
     this.matrix = new THREE.Matrix4();
 
     for (let i = 0; i < this.count; i++) {
-      this.dummy.position.x = (0.5 - Math.random()) * 50;
+      this.dummy.position.x = (0.5 - Math.random()) * 100;
       this.dummy.position.y = 1.5 / 2;
-      this.dummy.position.z = (0.5 - Math.random()) * 50;
+      this.dummy.position.z = (0.5 - Math.random()) * 100;
       this.dummy.updateMatrix();
       this.instance.setMatrixAt(i, this.dummy.matrix);
     }

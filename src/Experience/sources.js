@@ -14,4 +14,14 @@ export default [
     type: "texture",
     path: "textures/alphaGrass.png",
   },
+  {
+    name: "alphaGrass2",
+    type: "texture",
+    path: "textures/alphaGrass2.png",
+  },
+  {
+    name: "alphaGrass3",
+    type: "texture",
+    path: "textures/alphaGrass3.png",
+  },
 ];

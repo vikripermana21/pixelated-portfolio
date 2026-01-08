@@ -58,7 +58,7 @@ export default class Environment {
   }
 
   setPointLight() {
-    this.pointLight = new THREE.PointLight(new THREE.Color(0x000099), 100);
+    this.pointLight = new THREE.PointLight(new THREE.Color(0x990000), 100);
     this.pointLight.position.y = 100;
     this.pointLight.position.x = 2;
     this.pointLight.position.z = 1;
@@ -72,7 +72,7 @@ export default class Environment {
     this.ambientLight.intensity = this.params.ambientLightIntensity;
     this.directionalLight.intensity = this.params.directionalLightIntensity;
     this.directionalLight.lookAt(new THREE.Vector3());
-    this.pointLight.position.y = 7 + Math.sin(this.time.elapsed * 0.001);
+    this.pointLight.position.y = 8 + Math.sin(this.time.elapsed * 0.001);
     this.pointLight.rotation.x = Math.sin(this.time.elapsed * 0.001);
     this.pointLight.rotation.z = Math.cos(this.time.elapsed * 0.001);
   }

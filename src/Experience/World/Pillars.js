@@ -23,8 +23,9 @@ export default class Pillars {
     this.model.traverse((child) => {
       if (child instanceof THREE.Mesh) {
         child.castShadow = true;
+        child.receiveShadow = true;
         child.material = new THREE.MeshToonMaterial({
-          color: 0x575a57,
+          color: 0x747474,
           gradientMap: this.gradientMap,
         });
       }

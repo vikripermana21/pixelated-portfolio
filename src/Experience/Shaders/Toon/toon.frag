@@ -25,7 +25,7 @@ void main() {
   float shadow = getShadow(
     directionalShadowMap[0],
     directionalShadow.shadowMapSize,
-    directionalShadow.shadowIntensity * .95,
+    directionalShadow.shadowIntensity ,
     directionalShadow.shadowBias,
     directionalShadow.shadowRadius,
     vShadowCoord
@@ -34,7 +34,7 @@ vec3 diffuse = uColor * directionalLight.color ;
   vec3 ambient = uColor * ambientLightColor  ;
   vec3 color = ambient + diffuse * shadow ;
 
-  gl_FragColor = vec4(color * 0.3,alpha);
+  gl_FragColor = vec4(color * 0.32,alpha);
 
     #include <tonemapping_fragment>
     #include <colorspace_fragment>

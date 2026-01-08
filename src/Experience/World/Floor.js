@@ -33,7 +33,6 @@ export default class Floor {
     this.geo = new THREE.PlaneGeometry(300, 300);
     this.mat = new THREE.MeshToonMaterial({
       color: this.params.color,
-      gradientMap: this.gradientMap,
     });
 
     this.instance = new THREE.Mesh(this.geo, this.mat);

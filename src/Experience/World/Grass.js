@@ -2,6 +2,8 @@ import Experience from "../Experience";
 import * as THREE from "three";
 import vertexShader from "../Shaders/Toon/toon.vert";
 import fragmentShader from "../Shaders/Toon/toon.frag";
+import { FlexibleToonMaterial } from "../Materials/FlexibleToonMaterial";
+import { color } from "three/src/nodes/TSL.js";
 
 export default class Grass {
   constructor() {
@@ -27,23 +29,34 @@ export default class Grass {
 
   setInstance() {
     this.geo = new THREE.PlaneGeometry(1.5, 1.5);
-    this.mat = new THREE.ShaderMaterial({
-      lights: true,
-      uniforms: {
-        ...THREE.UniformsLib.lights,
-        uColor: { value: new THREE.Color(this.params.color) },
-        uAlphaGrass: { value: this.alphaGrass },
-      },
-      vertexShader,
-      fragmentShader,
-      transparent: true,
-      depthTest: true,
-      depthWrite: true,
+    this.mat = new FlexibleToonMaterial({
+      color: new THREE.Color(this.params.color),
+      alphaMap: this.alphaGrass,
+      alphaTest: 0.1,
+      isGrass: true,
     });
+    // this.mat = new THREE.ShaderMaterial({
+    //   lights: true,
+    //   uniforms: {
+    //     ...THREE.UniformsLib.lights,
+    //     uColor: { value: new THREE.Color(this.params.color) },
+    //     uAlphaGrass: { value: this.alphaGrass },
+    //   },
+    //   vertexShader,
+    //   fragmentShader,
+    //   transparent: true,
+    //   depthTest: true,
+    //   depthWrite: true,
+    // });
 
     this.instance = new THREE.InstancedMesh(this.geo, this.mat, this.count);
     this.instance.layers.set(1);
     this.instance.receiveShadow = true;
+    this.instance.getWorldPosition(new THREE.Vector3());
+
+    this.mat.userData.shader?.uniforms.objectCenter.value.copy(
+      new THREE.Vector3(),
+    );
 
     this.dummy = new THREE.Object3D();
     this.matrix = new THREE.Matrix4();

@@ -5,7 +5,7 @@ export default class Environment {
   constructor() {
     this.params = {
       ambientLightIntensity: 1,
-      directionalLightIntensity: 1,
+      directionalLightIntensity: 3,
     };
     this.experience = new Experience();
     this.debug = this.experience.debug;
@@ -58,11 +58,11 @@ export default class Environment {
   }
 
   setPointLight() {
-    this.pointLight = new THREE.PointLight(new THREE.Color(0x990000), 100);
+    this.pointLight = new THREE.PointLight(new THREE.Color(0x00ffff), 500);
     this.pointLight.position.y = 100;
     this.pointLight.position.x = 2;
     this.pointLight.position.z = 1;
-    // this.scene.add(this.pointLight);
+    this.scene.add(this.pointLight);
 
     this.pointLightHelper = new THREE.PointLightHelper(this.pointLight);
     this.scene.add(this.pointLightHelper);

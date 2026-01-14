@@ -1,5 +1,6 @@
 import Experience from "../Experience";
 import * as THREE from "three";
+import { FlexibleToonMaterial } from "../Materials/FlexibleToonMaterial";
 
 export default class Floor {
   constructor() {
@@ -23,18 +24,18 @@ export default class Floor {
     if (this.debug.active) {
       this.debug.ui.addBinding(this.params, "color").on("change", (ev) => {
         this.instance.material.color.set(new THREE.Color(ev.value));
-        this.experience.world.grass.instance.material.uniforms.uColor.value =
-          new THREE.Color(ev.value);
+        this.experience.world.grass.instance.material.color = new THREE.Color(
+          ev.value,
+        );
       });
     }
   }
 
   setInstance() {
     this.geo = new THREE.PlaneGeometry(300, 300);
-    this.mat = new THREE.MeshToonMaterial({
-      color: this.params.color,
+    this.mat = new FlexibleToonMaterial({
+      color: new THREE.Color(this.params.color),
     });
-
     this.instance = new THREE.Mesh(this.geo, this.mat);
     this.instance.rotation.x = -Math.PI / 2;
     this.instance.receiveShadow = true;

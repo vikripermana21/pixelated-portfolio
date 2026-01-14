@@ -1,5 +1,6 @@
 import Experience from "../Experience";
 import * as THREE from "three";
+import { FlexibleToonMaterial } from "../Materials/FlexibleToonMaterial";
 
 export default class Pillars {
   constructor() {
@@ -9,7 +10,6 @@ export default class Pillars {
     this.layers = this.experience.layers;
 
     this.resource = this.resources.items.pillarsModel;
-    this.gradientMap = this.resources.items.gradientMap;
     this.setModel();
   }
 
@@ -24,9 +24,8 @@ export default class Pillars {
       if (child instanceof THREE.Mesh) {
         child.castShadow = true;
         child.receiveShadow = true;
-        child.material = new THREE.MeshToonMaterial({
+        child.material = new FlexibleToonMaterial({
           color: 0x747474,
-          gradientMap: this.gradientMap,
         });
       }
     });

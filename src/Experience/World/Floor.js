@@ -35,6 +35,7 @@ export default class Floor {
     this.geo = new THREE.PlaneGeometry(300, 300);
     this.mat = new FlexibleToonMaterial({
       color: new THREE.Color(this.params.color),
+      isGrass: false,
     });
     this.instance = new THREE.Mesh(this.geo, this.mat);
     this.instance.rotation.x = -Math.PI / 2;

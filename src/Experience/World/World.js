@@ -1,4 +1,3 @@
-import * as THREE from "three";
 import Experience from "../Experience";
 import Environment from "./Environment";
 import Floor from "./Floor";
@@ -17,8 +16,8 @@ export default class World {
     this.resources.on("ready", () => {
       this.floor = new Floor();
       this.grass = new Grass();
-      // this.grass2 = new Grass2();
-      // this.grass3 = new Grass3();
+      this.grass2 = new Grass2();
+      this.grass3 = new Grass3();
       this.pillars = new Pillars();
       this.environment = new Environment();
     });

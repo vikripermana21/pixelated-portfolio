@@ -4,8 +4,28 @@ export class FlexibleToonMaterial extends THREE.MeshToonMaterial {
   constructor(params = {}) {
     super(params);
 
+    this.userData.isGrass = params.isGrass;
+
     this.onBeforeCompile = (shader) => {
       shader.uniforms.uStep = { value: 4.0 };
+      shader.uniforms.IS_GRASS = { value: this.userData.isGrass };
+
+      shader.vertexShader = shader.vertexShader.replace(
+        "#include <common>",
+        `#include <common>
+            varying vec4 vShadowCoord;
+            `,
+      );
+
+      if (this.userData.isGrass) {
+        shader.vertexShader = shader.vertexShader.replace(
+          "#include <shadowmap_vertex>",
+          `#include <shadowmap_vertex>
+        vec4 worldOrigin = modelMatrix * instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0);
+        vShadowCoord = directionalShadowMatrix[0] * worldOrigin;
+`,
+        );
+      }
 
       shader.fragmentShader = shader.fragmentShader.replace(
         "#include <common>",
@@ -16,9 +36,10 @@ export class FlexibleToonMaterial extends THREE.MeshToonMaterial {
             `,
       );
 
-      shader.fragmentShader = shader.fragmentShader.replace(
-        "#include <lights_toon_pars_fragment>",
-        `varying vec3 vViewPosition;
+      if (this.userData.isGrass) {
+        shader.fragmentShader = shader.fragmentShader.replace(
+          "#include <lights_toon_pars_fragment>",
+          `varying vec3 vViewPosition;
 
         struct ToonMaterial {
 
@@ -42,11 +63,11 @@ export class FlexibleToonMaterial extends THREE.MeshToonMaterial {
 
         #define RE_Direct				RE_Direct_Toon
         #define RE_IndirectDiffuse		RE_IndirectDiffuse_Toon`,
-      );
+        );
 
-      shader.fragmentShader = shader.fragmentShader.replace(
-        "#include <lights_fragment_begin>",
-        `
+        shader.fragmentShader = shader.fragmentShader.replace(
+          "#include <lights_fragment_begin>",
+          `
         /**
          * This is a template that can be used to light a material, it uses pluggable
          * RenderEquations (RE)for specific lighting scenarios.
@@ -119,7 +140,7 @@ export class FlexibleToonMaterial extends THREE.MeshToonMaterial {
 
 		#if defined( USE_SHADOWMAP ) && ( UNROLLED_LOOP_INDEX < NUM_POINT_LIGHT_SHADOWS ) && ( defined( SHADOWMAP_TYPE_PCF ) || defined( SHADOWMAP_TYPE_BASIC ) )
 		pointLightShadow = pointLightShadows[ i ];
-		directLight.color *= ( directLight.visible && receiveShadow ) ? getPointShadow( pointShadowMap[ i ], pointLightShadow.shadowMapSize, pointLightShadow.shadowIntensity, pointLightShadow.shadowBias, pointLightShadow.shadowRadius, vPointShadowCoord[ i ], pointLightShadow.shadowCameraNear, pointLightShadow.shadowCameraFar ) : 1.0;
+		directLight.color *= ( directLight.visible && receiveShadow ) ? getPointShadow( pointShadowMap[ i ], pointLightShadow.shadowMapSize, pointLightShadow.shadowIntensity, pointLightShadow.shadowBias, pointLightShadow.shadowRadius, vShadowCoord, pointLightShadow.shadowCameraNear, pointLightShadow.shadowCameraFar ) : 1.0;
 		#endif
 
 		RE_Direct( directLight, geometryPosition, geometryNormal, geometryViewDir, geometryClearcoatNormal, material, reflectedLight );
@@ -167,7 +188,7 @@ export class FlexibleToonMaterial extends THREE.MeshToonMaterial {
 
 		#if defined( USE_SHADOWMAP ) && ( UNROLLED_LOOP_INDEX < NUM_SPOT_LIGHT_SHADOWS )
 		spotLightShadow = spotLightShadows[ i ];
-		directLight.color *= ( directLight.visible && receiveShadow ) ? getShadow( spotShadowMap[ i ], spotLightShadow.shadowMapSize, spotLightShadow.shadowIntensity, spotLightShadow.shadowBias, spotLightShadow.shadowRadius, vSpotLightCoord[ i ] ) : 1.0;
+		directLight.color *= ( directLight.visible && receiveShadow ) ? getShadow( spotShadowMap[ i ], spotLightShadow.shadowMapSize, spotLightShadow.shadowIntensity, spotLightShadow.shadowBias, spotLightShadow.shadowRadius, vShadowCoord ) : 1.0;
 		#endif
 
 		RE_Direct( directLight, geometryPosition, geometryNormal, geometryViewDir, geometryClearcoatNormal, material, reflectedLight );
@@ -193,7 +214,7 @@ export class FlexibleToonMaterial extends THREE.MeshToonMaterial {
 
 		#if defined( USE_SHADOWMAP ) && ( UNROLLED_LOOP_INDEX < NUM_DIR_LIGHT_SHADOWS )
 		directionalLightShadow = directionalLightShadows[ i ];
-		directLight.color *= ( directLight.visible && receiveShadow ) ? getShadow( directionalShadowMap[ i ], directionalLightShadow.shadowMapSize, directionalLightShadow.shadowIntensity, directionalLightShadow.shadowBias, directionalLightShadow.shadowRadius, vDirectionalShadowCoord[ i ] ) : 1.0;
+		directLight.color *= ( directLight.visible && receiveShadow ) ? getShadow( directionalShadowMap[ i ], directionalLightShadow.shadowMapSize, directionalLightShadow.shadowIntensity, directionalLightShadow.shadowBias, directionalLightShadow.shadowRadius, vShadowCoord ) : 1.0;
 		#endif
 
 		RE_Direct( directLight, geometryPosition, geometryNormal, geometryViewDir, geometryClearcoatNormal, material, reflectedLight );
@@ -250,7 +271,8 @@ export class FlexibleToonMaterial extends THREE.MeshToonMaterial {
 	vec3 clearcoatRadiance = vec3( 0.0 );
 
         #endif        `,
-      );
+        );
+      }
 
       shader.fragmentShader = shader.fragmentShader.replace(
         "#include <aomap_fragment>",
@@ -267,10 +289,9 @@ export class FlexibleToonMaterial extends THREE.MeshToonMaterial {
                   directIntensity = floor(directIntensity * uStep) / uStep;
 
                   reflectedLight.directDiffuse *= directIntensity;
+
               `,
       );
-
-      console.log(shader.fragmentShader);
     };
   }
 }

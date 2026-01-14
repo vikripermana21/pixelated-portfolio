@@ -28,7 +28,7 @@ export default class Grass {
   }
 
   setInstance() {
-    this.geo = new THREE.PlaneGeometry(1.5, 1.5);
+    this.geo = new THREE.PlaneGeometry(2, 2);
     this.mat = new FlexibleToonMaterial({
       color: new THREE.Color(this.params.color),
       alphaMap: this.alphaGrass,

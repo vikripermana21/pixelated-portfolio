@@ -6,8 +6,10 @@ export default class Floor {
   constructor() {
     this.params = {
       color: "#2e8b57",
+      step: 10.0,
     };
     this.experience = new Experience();
+    this.world = this.experience.world;
     this.resources = this.experience.resources;
     this.debug = this.experience.debug;
     this.scene = this.experience.scene;
@@ -16,8 +18,8 @@ export default class Floor {
 
     this.gradientMap = this.resources.items.gradientMap;
 
-    this.setParams();
     this.setInstance();
+    this.setParams();
   }
 
   setParams() {
@@ -28,6 +30,12 @@ export default class Floor {
           ev.value,
         );
       });
+
+      this.debug.ui.addBinding(this.params, "step", {
+        min: 1,
+        max: 10,
+        step: 1,
+      });
     }
   }
 
@@ -36,6 +44,7 @@ export default class Floor {
     this.mat = new FlexibleToonMaterial({
       color: new THREE.Color(this.params.color),
       isGrass: false,
+      step: this.params.step,
     });
     this.instance = new THREE.Mesh(this.geo, this.mat);
     this.instance.rotation.x = -Math.PI / 2;
@@ -43,5 +52,15 @@ export default class Floor {
     this.scene.add(this.instance);
   }
 
-  update() {}
+  update() {
+    this.mat.step = this.params.step;
+    if (this.world) {
+      this.world.grass.instance.material.step = this.params.step;
+      this.world.pillars.model.traverse((child) => {
+        if (child instanceof THREE.Mesh) {
+          child.material.step = this.params.step;
+        }
+      });
+    }
+  }
 }

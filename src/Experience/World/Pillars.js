@@ -16,8 +16,6 @@ export default class Pillars {
   setModel() {
     this.model = this.resource.scene;
     this.model.scale.setScalar(2);
-    this.model.position.z = -15;
-    this.model.position.x = 2;
     this.scene.add(this.model);
 
     this.model.traverse((child) => {

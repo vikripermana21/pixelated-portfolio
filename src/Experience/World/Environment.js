@@ -8,6 +8,7 @@ export default class Environment {
       directionalLightIntensity: 4,
       pointLightIntensity: 100,
       pointLightColor: "#ffffff",
+      pointLightDecay: 1,
     };
     this.experience = new Experience();
     this.debug = this.experience.debug;
@@ -62,6 +63,13 @@ export default class Environment {
         max: 1000,
         step: 1,
       });
+
+      this.pointTweaks.addBinding(this.params, "pointLightDecay", {
+        label: "decay",
+        min: 0,
+        max: 10,
+        step: 0.1,
+      });
       this.pointTweaks
         .addBinding(this.params, "pointLightColor", { label: "color" })
         .on("change", (ev) => {
@@ -106,8 +114,6 @@ export default class Environment {
     this.pointLight.decay = 1;
     this.pointLight.distance = 40;
     this.pointLight.position.y = 100;
-    this.pointLight.position.x = 2;
-    this.pointLight.position.z = 1;
     this.scene.add(this.pointLight);
 
     this.pointLightHelper = new THREE.PointLightHelper(this.pointLight);
@@ -118,8 +124,9 @@ export default class Environment {
     this.ambientLight.intensity = this.params.ambientLightIntensity;
     this.directionalLight.intensity = this.params.directionalLightIntensity;
     this.pointLight.intensity = this.params.pointLightIntensity;
+    this.pointLight.decay = this.params.pointLightDecay;
     this.directionalLight.lookAt(new THREE.Vector3());
-    this.pointLight.position.y = 15 + Math.sin(this.time.elapsed * 0.001);
+    this.pointLight.position.y = 10 + Math.sin(this.time.elapsed * 0.001) * 2;
     this.pointLight.rotation.x = Math.sin(this.time.elapsed * 0.001);
     this.pointLight.rotation.z = Math.cos(this.time.elapsed * 0.001);
   }

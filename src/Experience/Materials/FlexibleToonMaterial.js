@@ -5,9 +5,13 @@ export class FlexibleToonMaterial extends THREE.MeshToonMaterial {
     super(params);
 
     this.userData.isGrass = params.isGrass;
+    this.userData.uStep = params.step ?? 10.0;
+
+    this._shader = null;
 
     this.onBeforeCompile = (shader) => {
-      shader.uniforms.uStep = { value: 4.0 };
+      this._shader = shader;
+      shader.uniforms.uStep = { value: this.userData.uStep };
       shader.uniforms.IS_GRASS = { value: this.userData.isGrass };
 
       shader.vertexShader = shader.vertexShader.replace(
@@ -293,5 +297,15 @@ export class FlexibleToonMaterial extends THREE.MeshToonMaterial {
               `,
       );
     };
+  }
+  set step(value) {
+    this.userData.uStep = value;
+    if (this._shader) {
+      this._shader.uniforms.uStep.value = value;
+    }
+  }
+
+  get step() {
+    return this.userData.uStep;
   }
 }

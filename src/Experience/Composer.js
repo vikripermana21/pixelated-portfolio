@@ -27,10 +27,11 @@ export default class Composer {
 
     // Pixelated Pass
     this.pixelatedPass = new PixelationPass(
-      4,
+      2,
       this.scene,
       this.camera.instance,
     );
+    this.pixelatedPass.normalEdgeStrength = 2;
     this.instance.addPass(this.pixelatedPass);
 
     // Output Pass

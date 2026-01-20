@@ -5,31 +5,79 @@ export default class Environment {
   constructor() {
     this.params = {
       ambientLightIntensity: 1,
-      directionalLightIntensity: 1,
+      directionalLightIntensity: 4,
+      pointLightIntensity: 100,
+      pointLightColor: "#ffffff",
+      pointLightDecay: 1,
     };
     this.experience = new Experience();
     this.debug = this.experience.debug;
     this.scene = this.experience.scene;
     this.time = this.experience.time;
 
+    this.setTweaks();
     this.setAmbientLight();
     this.setDirectionalLight();
     this.setPointLight();
   }
 
-  setAmbientLight() {
+  setTweaks() {
     if (this.debug.active) {
-      this.debug.ui.addBinding(this.params, "ambientLightIntensity", {
+      this.tweaks = this.debug.ui.addFolder({
+        title: "Lighting",
+        expanded: false,
+      });
+
+      this.ambientTweaks = this.tweaks.addFolder({
+        title: "Ambient Light",
+      });
+
+      this.directionalTweaks = this.tweaks.addFolder({
+        title: "Directional Light",
+      });
+
+      this.pointTweaks = this.tweaks.addFolder({
+        title: "Point Light",
+      });
+      this.ambientTweaks.addBinding(this.params, "ambientLightIntensity", {
+        label: "intensity",
         min: 0,
         max: 10,
         step: 0.1,
       });
-      this.debug.ui.addBinding(this.params, "directionalLightIntensity", {
+
+      this.directionalTweaks.addBinding(
+        this.params,
+        "directionalLightIntensity",
+        {
+          label: "intensity",
+          min: 0,
+          max: 10,
+          step: 0.1,
+        },
+      );
+      this.pointTweaks.addBinding(this.params, "pointLightIntensity", {
+        label: "intensity",
+        min: 0,
+        max: 1000,
+        step: 1,
+      });
+
+      this.pointTweaks.addBinding(this.params, "pointLightDecay", {
+        label: "decay",
         min: 0,
         max: 10,
         step: 0.1,
       });
+      this.pointTweaks
+        .addBinding(this.params, "pointLightColor", { label: "color" })
+        .on("change", (ev) => {
+          this.pointLight.color.set(new THREE.Color(ev.value));
+        });
     }
+  }
+
+  setAmbientLight() {
     this.ambientLight = new THREE.AmbientLight();
     this.ambientLight.intensity = this.params.ambientLightIntensity;
     this.scene.add(this.ambientLight);
@@ -58,11 +106,14 @@ export default class Environment {
   }
 
   setPointLight() {
-    this.pointLight = new THREE.PointLight(new THREE.Color(0x990000), 100);
+    this.pointLight = new THREE.PointLight(
+      new THREE.Color(this.params.pointLightColor),
+      this.params.pointLightIntensity,
+    );
+    this.pointLight.decay = 1;
+    this.pointLight.distance = 40;
     this.pointLight.position.y = 100;
-    this.pointLight.position.x = 2;
-    this.pointLight.position.z = 1;
-    // this.scene.add(this.pointLight);
+    this.scene.add(this.pointLight);
 
     this.pointLightHelper = new THREE.PointLightHelper(this.pointLight);
     this.scene.add(this.pointLightHelper);
@@ -71,8 +122,10 @@ export default class Environment {
   update() {
     this.ambientLight.intensity = this.params.ambientLightIntensity;
     this.directionalLight.intensity = this.params.directionalLightIntensity;
+    this.pointLight.intensity = this.params.pointLightIntensity;
+    this.pointLight.decay = this.params.pointLightDecay;
     this.directionalLight.lookAt(new THREE.Vector3());
-    this.pointLight.position.y = 8 + Math.sin(this.time.elapsed * 0.001);
+    this.pointLight.position.y = 10 + Math.sin(this.time.elapsed * 0.001) * 2;
     this.pointLight.rotation.x = Math.sin(this.time.elapsed * 0.001);
     this.pointLight.rotation.z = Math.cos(this.time.elapsed * 0.001);
   }

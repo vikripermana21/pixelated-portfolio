@@ -1,7 +1,6 @@
 import Experience from "../Experience";
 import * as THREE from "three";
-import vertexShader from "../Shaders/Toon/toon.vert";
-import fragmentShader from "../Shaders/Toon/toon.frag";
+import { FlexibleToonMaterial } from "../Materials/FlexibleToonMaterial";
 
 export default class Grass2 {
   constructor() {
@@ -29,28 +28,33 @@ export default class Grass2 {
   setParams() {
     if (this.debug.active) {
       this.debug.ui.addBinding(this.params, "color").on("change", (ev) => {
-        this.instance.material.uniforms.uColor.value = new THREE.Color(
-          ev.value,
-        );
+        this.instance.material.color = new THREE.Color(ev.value);
       });
     }
   }
 
   setInstance() {
     this.geo = new THREE.PlaneGeometry(1.5, 1.5);
-    this.mat = new THREE.ShaderMaterial({
-      lights: true,
-      uniforms: {
-        ...THREE.UniformsLib.lights,
-        uColor: { value: new THREE.Color(this.params.color) },
-        uAlphaGrass: { value: this.alphaGrass2 },
-      },
-      vertexShader,
-      fragmentShader,
-      transparent: true,
-      depthTest: true,
-      depthWrite: true,
+    this.mat = new FlexibleToonMaterial({
+      color: new THREE.Color(this.params.color),
+      alphaMap: this.alphaGrass2,
+      alphaTest: 0.1,
+      isGrass: true,
     });
+
+    // this.mat = new THREE.ShaderMaterial({
+    //   lights: true,
+    //   uniforms: {
+    //     ...THREE.UniformsLib.lights,
+    //     uColor: { value: new THREE.Color(this.params.color) },
+    //     uAlphaGrass: { value: this.alphaGrass2 },
+    //   },
+    //   vertexShader,
+    //   fragmentShader,
+    //   transparent: true,
+    //   depthTest: true,
+    //   depthWrite: true,
+    // });
 
     this.instance = new THREE.InstancedMesh(this.geo, this.mat, this.count);
     this.instance.layers.set(1);

@@ -32,7 +32,7 @@ void main() {
   );
 vec3 diffuse = uColor * directionalLight.color ;
   vec3 ambient = uColor * ambientLightColor  ;
-  vec3 color = ambient + diffuse * shadow ;
+  vec3 color = ambient + diffuse * shadow;
 
   gl_FragColor = vec4(color * 0.32,alpha);
 

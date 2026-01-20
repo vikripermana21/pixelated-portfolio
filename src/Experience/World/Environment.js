@@ -1,13 +1,14 @@
+import gsap from "gsap";
 import Experience from "../Experience";
 import * as THREE from "three";
 
 export default class Environment {
   constructor() {
     this.params = {
-      ambientLightIntensity: 1,
-      directionalLightIntensity: 4,
-      pointLightIntensity: 100,
-      pointLightColor: "#ffffff",
+      ambientLightIntensity: 0,
+      directionalLightIntensity: 0,
+      pointLightIntensity: 0,
+      pointLightColor: "#ffe500",
       pointLightDecay: 1,
     };
     this.experience = new Experience();
@@ -112,20 +113,25 @@ export default class Environment {
     );
     this.pointLight.decay = 1;
     this.pointLight.distance = 40;
-    this.pointLight.position.y = 100;
     this.scene.add(this.pointLight);
 
-    this.pointLightHelper = new THREE.PointLightHelper(this.pointLight);
-    this.scene.add(this.pointLightHelper);
+    gsap.to(this.pointLight, {
+      intensity: 100,
+      ease: "sine.inOut",
+      duration: 2,
+    });
+
+    // this.pointLightHelper = new THREE.PointLightHelper(this.pointLight);
+    // this.scene.add(this.pointLightHelper);
   }
 
   update() {
     this.ambientLight.intensity = this.params.ambientLightIntensity;
     this.directionalLight.intensity = this.params.directionalLightIntensity;
-    this.pointLight.intensity = this.params.pointLightIntensity;
+    // this.pointLight.intensity = this.params.pointLightIntensity;
     this.pointLight.decay = this.params.pointLightDecay;
     this.directionalLight.lookAt(new THREE.Vector3());
-    this.pointLight.position.y = 10 + Math.sin(this.time.elapsed * 0.001) * 2;
+    this.pointLight.position.y = 10 + Math.sin(this.time.elapsed * 0.001);
     this.pointLight.rotation.x = Math.sin(this.time.elapsed * 0.001);
     this.pointLight.rotation.z = Math.cos(this.time.elapsed * 0.001);
   }

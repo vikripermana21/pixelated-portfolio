@@ -64,9 +64,9 @@ export default class Grass3 {
     this.matrix = new THREE.Matrix4();
 
     for (let i = 0; i < this.count; i++) {
-      this.dummy.position.x = (0.5 - Math.random()) * 100;
+      this.dummy.position.x = (0.5 - Math.random()) * 200;
       this.dummy.position.y = 1.5 / 2;
-      this.dummy.position.z = (0.5 - Math.random()) * 100;
+      this.dummy.position.z = (0.5 - Math.random()) * 200;
       this.dummy.updateMatrix();
       this.instance.setMatrixAt(i, this.dummy.matrix);
     }

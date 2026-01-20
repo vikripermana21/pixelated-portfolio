@@ -5,6 +5,7 @@ import Grass from "./Grass";
 import Pillars from "./Pillars";
 import Grass2 from "./Grass2";
 import Grass3 from "./Grass3";
+import Grace from "./Grace";
 
 export default class World {
   constructor() {
@@ -20,6 +21,7 @@ export default class World {
       this.grass3 = new Grass3();
       this.pillars = new Pillars();
       this.environment = new Environment();
+      this.grace = new Grace();
     });
   }
 
@@ -29,5 +31,6 @@ export default class World {
     if (this.grass) this.grass.update();
     if (this.grass2) this.grass2.update();
     if (this.grass3) this.grass3.update();
+    if (this.grace) this.grace.update();
   }
 }

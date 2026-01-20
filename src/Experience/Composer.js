@@ -32,6 +32,7 @@ export default class Composer {
       this.camera.instance,
     );
     this.pixelatedPass.normalEdgeStrength = 2;
+    this.pixelatedPass.depthEdgeStrength = 2;
     this.instance.addPass(this.pixelatedPass);
 
     // Output Pass

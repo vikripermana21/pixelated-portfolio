@@ -15,23 +15,6 @@ export default class Environment {
     this.scene = this.experience.scene;
     this.time = this.experience.time;
 
-    this.tweaks = this.debug.ui.addFolder({
-      title: "Lighting",
-      expanded: false,
-    });
-
-    this.ambientTweaks = this.tweaks.addFolder({
-      title: "Ambient Light",
-    });
-
-    this.directionalTweaks = this.tweaks.addFolder({
-      title: "Directional Light",
-    });
-
-    this.pointTweaks = this.tweaks.addFolder({
-      title: "Point Light",
-    });
-
     this.setTweaks();
     this.setAmbientLight();
     this.setDirectionalLight();
@@ -40,6 +23,22 @@ export default class Environment {
 
   setTweaks() {
     if (this.debug.active) {
+      this.tweaks = this.debug.ui.addFolder({
+        title: "Lighting",
+        expanded: false,
+      });
+
+      this.ambientTweaks = this.tweaks.addFolder({
+        title: "Ambient Light",
+      });
+
+      this.directionalTweaks = this.tweaks.addFolder({
+        title: "Directional Light",
+      });
+
+      this.pointTweaks = this.tweaks.addFolder({
+        title: "Point Light",
+      });
       this.ambientTweaks.addBinding(this.params, "ambientLightIntensity", {
         label: "intensity",
         min: 0,

@@ -1,7 +1,5 @@
 import Experience from "../Experience";
 import * as THREE from "three";
-import vertexShader from "../Shaders/Toon/toon.vert";
-import fragmentShader from "../Shaders/Toon/toon.frag";
 import { FlexibleToonMaterial } from "../Materials/FlexibleToonMaterial";
 
 export default class Grass2 {

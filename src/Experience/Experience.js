@@ -9,6 +9,7 @@ import sources from "./sources";
 import Debug from "./Utils/Debug";
 import Composer from "./Composer";
 import Physics from "./World/Physics";
+import InputController from "./UI/InputController";
 
 let instance;
 export default class Experience {
@@ -26,6 +27,7 @@ export default class Experience {
     this.bloomLayer.set(2);
 
     this.debug = new Debug();
+    this.inputController = new InputController();
     this.sizes = new Sizes();
     this.time = new Time();
     this.scene = new THREE.Scene();

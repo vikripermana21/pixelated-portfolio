@@ -7,6 +7,7 @@ import Grass2 from "./Grass2";
 import Grass3 from "./Grass3";
 import Grace from "./Grace";
 import Physics from "./Physics";
+import Character from "./Character";
 
 export default class World {
   constructor() {
@@ -19,12 +20,15 @@ export default class World {
       // Wait for resources
       this.resources.on("ready", () => {
         this.floor = new Floor();
+        this.character = new Character();
         this.grass = new Grass();
         this.grass2 = new Grass2();
         this.grass3 = new Grass3();
         this.pillars = new Pillars();
         this.environment = new Environment();
         this.grace = new Grace();
+        this.grace2 = new Grace();
+        this.grace2.instance.position.setScalar(-70);
       });
     });
   }
@@ -37,5 +41,7 @@ export default class World {
     if (this.grass2) this.grass2.update();
     if (this.grass3) this.grass3.update();
     if (this.grace) this.grace.update();
+    if (this.grace2) this.grace2.update();
+    if (this.character) this.character.update();
   }
 }

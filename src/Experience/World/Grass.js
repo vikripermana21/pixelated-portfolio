@@ -1,14 +1,13 @@
 import Experience from "../Experience";
 import * as THREE from "three";
 import { FlexibleToonMaterial } from "../Materials/FlexibleToonMaterial";
-import { color } from "three/src/nodes/TSL.js";
 
 export default class Grass {
   constructor() {
     this.params = {
       color: "#2e8b57",
     };
-    this.count = 1000;
+    this.count = 100;
     this.experience = new Experience();
     this.scene = this.experience.scene;
     this.camera = this.experience.camera;

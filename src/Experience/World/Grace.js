@@ -19,17 +19,17 @@ export default class Grace {
     this.camera = this.experience.camera;
     this.debug = this.experience.debug;
     this.sizes = this.experience.sizes;
+    this.area = new THREE.Box3();
 
     this.setInstance();
-
-    window.addEventListener("click", () => {
-      if (!this.plane) {
-        this.sound.play();
-        this.setLight();
-      }
-    });
-
     this.setTweaks();
+  }
+
+  touch() {
+    if (!this.plane) {
+      this.sound.play();
+      this.setLight();
+    }
   }
 
   setInstance() {
@@ -102,6 +102,15 @@ export default class Grace {
       this.plane.position.copy(this.mesh.position);
       this.plane.lookAt(this.camera.instance.position);
       this.pointLight.position.y = 15 + Math.sin(this.time.elapsed * 0.001) * 2;
+    }
+    this.area.setFromObject(this.instance);
+
+    if (
+      this.area.intersectsBox(
+        this.experience.world.character.area.expandByScalar(10),
+      )
+    ) {
+      this.touch();
     }
   }
 }

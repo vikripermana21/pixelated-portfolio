@@ -8,6 +8,7 @@ export default class Pillars {
     this.scene = this.experience.scene;
     this.resources = this.experience.resources;
     this.layers = this.experience.layers;
+    this.physics = this.experience.world.physics;
 
     this.resource = this.resources.items.pillarsModel;
     this.setModel();
@@ -27,6 +28,7 @@ export default class Pillars {
         child.material = new FlexibleToonMaterial({
           color: 0x747474,
         });
+        this.physics.add(child, "fixed", "trimesh");
       }
     });
   }

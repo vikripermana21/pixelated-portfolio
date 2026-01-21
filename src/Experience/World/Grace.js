@@ -10,7 +10,7 @@ export default class Grace {
     this.sound = new Audio("/audio/grace.mp3");
     this.sound.volume = 0.2;
     this.params = {
-      uColor: "#f8f1e2",
+      uColor: "#ffce3c",
     };
     this.experience = new Experience();
     this.scene = this.experience.scene;
@@ -32,9 +32,16 @@ export default class Grace {
   }
 
   setInstance() {
+    this.instance = new THREE.Group();
     this.geo = new THREE.BoxGeometry(1, 2, 1);
-    this.mat = new FlexibleToonMaterial();
-    this.instance = new THREE.Mesh(this.geo, this.mat);
+    this.mat = new FlexibleToonMaterial({
+      color: new THREE.Color(this.params.uColor),
+    });
+    this.mesh = new THREE.Mesh(this.geo, this.mat);
+    this.mesh.position.y = 2;
+    this.mesh.layers.set(2);
+    this.instance.add(this.mesh);
+
     this.scene.add(this.instance);
   }
 
@@ -53,16 +60,16 @@ export default class Grace {
         depthWrite: false,
       }),
     );
-    this.plane.layers.set(1);
-    this.scene.add(this.plane);
+    this.plane.layers.set(2);
+    this.instance.add(this.plane);
 
     this.pointLight = new THREE.PointLight(
-      new THREE.Color(this.params.pointLightColor),
+      new THREE.Color(this.params.uColor),
       0,
     );
     this.pointLight.decay = 1;
     this.pointLight.distance = 40;
-    this.scene.add(this.pointLight);
+    this.instance.add(this.pointLight);
 
     gsap.to(this.pointLight, {
       intensity: 100,
@@ -81,20 +88,18 @@ export default class Grace {
     if (this.debug.active) {
       this.tweaks = this.debug.ui.addFolder({ title: "Grace" });
       this.tweaks.addBinding(this.params, "uColor").on("change", (ev) => {
+        this.mesh.material.color = new THREE.Color(ev.value);
+        this.pointLight.color = new THREE.Color(ev.value);
         this.plane.material.uniforms.uColor.value = new THREE.Color(ev.value);
       });
     }
   }
 
   update() {
-    this.instance.position.y = 5 + Math.sin(this.time.elapsed * 0.001) * 2;
+    this.instance.position.y = Math.sin(this.time.elapsed * 0.001);
     if (this.plane) {
-      this.plane.position.copy(this.instance.position);
-      this.plane.lookAt(
-        this.camera.instance.position.x,
-        0,
-        this.camera.instance.position.z,
-      );
+      this.plane.position.copy(this.mesh.position);
+      this.plane.lookAt(this.camera.instance.position);
       this.pointLight.position.y = 15 + Math.sin(this.time.elapsed * 0.001) * 2;
     }
   }

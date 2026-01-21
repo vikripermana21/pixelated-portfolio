@@ -21,6 +21,8 @@ export default class Experience {
     this.outlineObject = [];
 
     this.canvas = _canvas;
+    this.bloomLayer = new THREE.Layers();
+    this.bloomLayer.set(2);
 
     this.debug = new Debug();
     this.sizes = new Sizes();

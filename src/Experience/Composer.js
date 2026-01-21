@@ -27,7 +27,7 @@ export default class Composer {
 
     // Pixelated Pass
     this.pixelatedPass = new PixelationPass(
-      2,
+      3,
       this.scene,
       this.camera.instance,
     );

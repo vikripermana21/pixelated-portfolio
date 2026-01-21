@@ -8,12 +8,13 @@ import gsap from "gsap";
 export default class Grace {
   constructor() {
     this.sound = new Audio("/audio/grace.mp3");
-    this.sound.volume = 0.2;
+    this.sound.volume = 0.7;
     this.params = {
       uColor: "#ffce3c",
     };
     this.experience = new Experience();
     this.scene = this.experience.scene;
+    this.world = this.experience.world;
     this.time = this.experience.time;
     this.camera = this.experience.camera;
     this.debug = this.experience.debug;
@@ -33,7 +34,7 @@ export default class Grace {
 
   setInstance() {
     this.instance = new THREE.Group();
-    this.geo = new THREE.BoxGeometry(1, 2, 1);
+    this.geo = new THREE.BoxGeometry(0.5, 1, 0.5);
     this.mat = new FlexibleToonMaterial({
       color: new THREE.Color(this.params.uColor),
     });

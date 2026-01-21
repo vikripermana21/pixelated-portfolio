@@ -8,6 +8,7 @@ import World from "./World/World";
 import sources from "./sources";
 import Debug from "./Utils/Debug";
 import Composer from "./Composer";
+import Physics from "./World/Physics";
 
 let instance;
 export default class Experience {

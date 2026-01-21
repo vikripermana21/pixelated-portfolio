@@ -6,26 +6,31 @@ import Pillars from "./Pillars";
 import Grass2 from "./Grass2";
 import Grass3 from "./Grass3";
 import Grace from "./Grace";
+import Physics from "./Physics";
 
 export default class World {
   constructor() {
     this.experience = new Experience();
     this.scene = this.experience.scene;
     this.resources = this.experience.resources;
+    this.physics = new Physics();
 
-    // Wait for resources
-    this.resources.on("ready", () => {
-      this.floor = new Floor();
-      this.grass = new Grass();
-      this.grass2 = new Grass2();
-      this.grass3 = new Grass3();
-      this.pillars = new Pillars();
-      this.environment = new Environment();
-      this.grace = new Grace();
+    this.physics.on("ready", () => {
+      // Wait for resources
+      this.resources.on("ready", () => {
+        this.floor = new Floor();
+        this.grass = new Grass();
+        this.grass2 = new Grass2();
+        this.grass3 = new Grass3();
+        this.pillars = new Pillars();
+        this.environment = new Environment();
+        this.grace = new Grace();
+      });
     });
   }
 
   update() {
+    this.physics.update();
     if (this.environment) this.environment.update();
     if (this.floor) this.floor.update();
     if (this.grass) this.grass.update();

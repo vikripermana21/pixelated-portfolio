@@ -57,6 +57,8 @@ export default class Floor {
     this.instance.rotation.x = -Math.PI / 2;
     this.instance.receiveShadow = true;
     this.scene.add(this.instance);
+
+    this.world.physics.add(this.instance, "fixed", "cuboid");
   }
 
   update() {

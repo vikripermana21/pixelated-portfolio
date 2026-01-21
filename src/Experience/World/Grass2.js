@@ -1,6 +1,7 @@
 import Experience from "../Experience";
 import * as THREE from "three";
 import { FlexibleToonMaterial } from "../Materials/FlexibleToonMaterial";
+import { label } from "three/tsl";
 
 export default class Grass2 {
   constructor() {
@@ -27,9 +28,13 @@ export default class Grass2 {
 
   setParams() {
     if (this.debug.active) {
-      this.debug.ui.addBinding(this.params, "color").on("change", (ev) => {
-        this.instance.material.color = new THREE.Color(ev.value);
-      });
+      this.debug.ui
+        .addBinding(this.params, "color", {
+          label: "Grass 2 Color",
+        })
+        .on("change", (ev) => {
+          this.instance.material.color = new THREE.Color(ev.value);
+        });
     }
   }
 
@@ -64,9 +69,9 @@ export default class Grass2 {
     this.matrix = new THREE.Matrix4();
 
     for (let i = 0; i < this.count; i++) {
-      this.dummy.position.x = (0.5 - Math.random()) * 100;
+      this.dummy.position.x = (0.5 - Math.random()) * 200;
       this.dummy.position.y = 1.5 / 2;
-      this.dummy.position.z = (0.5 - Math.random()) * 100;
+      this.dummy.position.z = (0.5 - Math.random()) * 200;
       this.dummy.updateMatrix();
       this.instance.setMatrixAt(i, this.dummy.matrix);
     }

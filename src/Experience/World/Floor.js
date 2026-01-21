@@ -1,6 +1,7 @@
 import Experience from "../Experience";
 import * as THREE from "three";
 import { FlexibleToonMaterial } from "../Materials/FlexibleToonMaterial";
+import { label } from "three/tsl";
 
 export default class Floor {
   constructor() {
@@ -24,14 +25,20 @@ export default class Floor {
 
   setParams() {
     if (this.debug.active) {
-      this.debug.ui.addBinding(this.params, "color").on("change", (ev) => {
-        this.instance.material.color.set(new THREE.Color(ev.value));
-        this.experience.world.grass.instance.material.color = new THREE.Color(
-          ev.value,
-        );
-      });
+      this.tweaks = this.debug.ui.addFolder({ title: "Environment" });
+      this.tweaks
+        .addBinding(this.params, "color", {
+          label: "Grass Floor Color",
+        })
+        .on("change", (ev) => {
+          this.instance.material.color.set(new THREE.Color(ev.value));
+          this.experience.world.grass.instance.material.color = new THREE.Color(
+            ev.value,
+          );
+        });
 
-      this.debug.ui.addBinding(this.params, "step", {
+      this.tweaks.addBinding(this.params, "step", {
+        label: "Step Lighting",
         min: 1,
         max: 10,
         step: 1,

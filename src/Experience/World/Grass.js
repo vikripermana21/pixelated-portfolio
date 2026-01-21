@@ -8,7 +8,7 @@ export default class Grass {
     this.params = {
       color: "#2e8b57",
     };
-    this.count = 10000;
+    this.count = 1000;
     this.experience = new Experience();
     this.scene = this.experience.scene;
     this.camera = this.experience.camera;
@@ -60,9 +60,9 @@ export default class Grass {
     this.matrix = new THREE.Matrix4();
 
     for (let i = 0; i < this.count; i++) {
-      this.dummy.position.x = (0.5 - Math.random()) * 100;
+      this.dummy.position.x = (0.5 - Math.random()) * 200;
       this.dummy.position.y = 1.5 / 2;
-      this.dummy.position.z = (0.5 - Math.random()) * 100;
+      this.dummy.position.z = (0.5 - Math.random()) * 200;
       this.dummy.updateMatrix();
       this.instance.setMatrixAt(i, this.dummy.matrix);
     }

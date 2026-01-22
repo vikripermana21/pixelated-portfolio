@@ -24,9 +24,16 @@ export default class Character {
       this.left = state.left;
       this.right = state.right;
       this.run = state.run;
+
+      if (this.run) {
+        this.animation.play("running");
+      } else {
+        this.animation.play("walking");
+      }
     });
 
     this.setInstance();
+    this.setAnimation();
   }
 
   setInstance() {
@@ -62,11 +69,46 @@ export default class Character {
     // set rigid body position to character position
     const worldPosition = this.model.getWorldPosition(new THREE.Vector3());
     const worldRotation = this.model.getWorldQuaternion(new THREE.Quaternion());
+
     this.rigidBody.setTranslation(worldPosition);
     this.rigidBody.setRotation(worldRotation);
 
     this.characterController =
       this.physics.world.createCharacterController(0.01);
+  }
+
+  setAnimation() {
+    this.animation = {};
+
+    // Mixer
+    this.animation.mixer = new THREE.AnimationMixer(this.model);
+
+    // Actions
+    this.animation.actions = {};
+
+    this.animation.actions.walking = this.animation.mixer.clipAction(
+      this.resource.animations[1],
+    );
+    this.animation.actions.running = this.animation.mixer.clipAction(
+      this.resource.animations[0],
+    );
+
+    this.animation.actions.current = this.animation.actions.walking;
+    this.animation.actions.current.play();
+
+    // Play the action
+    this.animation.play = (name) => {
+      const newAction = this.animation.actions[name];
+      const oldAction = this.animation.actions.current;
+
+      if (newAction === oldAction) return;
+
+      newAction.reset();
+      newAction.play();
+      newAction.crossFadeFrom(oldAction, 1);
+
+      this.animation.actions.current = newAction;
+    };
   }
 
   update() {
@@ -129,5 +171,6 @@ export default class Character {
     this.model.quaternion.copy(this.rigidBody.rotation());
 
     this.camera.updateCamera(this.model);
+    this.animation.mixer.update(this.time.delta * 0.001);
   }
 }

@@ -10,8 +10,13 @@ export default class Character {
     this.physics = this.experience.world.physics;
     this.time = this.experience.time;
     this.camera = this.experience.camera;
+    this.resources = this.experience.resources;
+
+    this.resource = this.resources.items.characterModel;
     this.speed = 0.01;
     this.area = new THREE.Box3();
+    this.rotationY = 0;
+    this.turnSpeed = 0.003;
 
     inputStore.subscribe((state) => {
       this.forward = state.forward;
@@ -25,6 +30,9 @@ export default class Character {
   }
 
   setInstance() {
+    this.model = this.resource.scene;
+    this.model.position.set(0, 20, 30);
+    this.model.scale.setScalar(5);
     const geometry = new THREE.BoxGeometry(2, 4, 2);
     const material = new FlexibleToonMaterial({
       color: 0x00ff00,
@@ -33,7 +41,7 @@ export default class Character {
     this.instance = new THREE.Mesh(geometry, material);
     this.instance.position.set(0, 20, 30);
     this.instance.castShadow = true;
-    this.scene.add(this.instance);
+    this.scene.add(this.model);
 
     // create a rigid body
     this.rigidBodyType =
@@ -52,10 +60,8 @@ export default class Character {
     );
 
     // set rigid body position to character position
-    const worldPosition = this.instance.getWorldPosition(new THREE.Vector3());
-    const worldRotation = this.instance.getWorldQuaternion(
-      new THREE.Quaternion(),
-    );
+    const worldPosition = this.model.getWorldPosition(new THREE.Vector3());
+    const worldRotation = this.model.getWorldQuaternion(new THREE.Quaternion());
     this.rigidBody.setTranslation(worldPosition);
     this.rigidBody.setRotation(worldRotation);
 
@@ -64,21 +70,37 @@ export default class Character {
   }
 
   update() {
-    this.area.setFromObject(this.instance);
+    this.area.setFromObject(this.model);
     const movement = new THREE.Vector3();
     let speed = 0.01;
+    const forward = new THREE.Vector3(0, 0, -1);
+    forward.applyAxisAngle(new THREE.Vector3(0, 1, 0), this.rotationY);
 
+    // if (this.forward) {
+    //   movement.z -= 1;
+    // }
+    // if (this.backward) {
+    //   movement.z += 1;
+    // }
     if (this.forward) {
-      movement.z -= 1;
+      movement.add(forward);
     }
+
     if (this.backward) {
-      movement.z += 1;
+      movement.sub(forward);
     }
+    // if (this.left) {
+    //   movement.x -= 1;
+    // }
+    // if (this.right) {
+    //   movement.x += 1;
+    // }
     if (this.left) {
-      movement.x -= 1;
+      this.rotationY += this.time.delta * this.turnSpeed;
     }
+
     if (this.right) {
-      movement.x += 1;
+      this.rotationY -= this.time.delta * this.turnSpeed;
     }
     if (this.run) {
       speed += 0.01;
@@ -91,14 +113,21 @@ export default class Character {
     // this.characterController.enableAutostep(3, 0.1, true);
     // this.characterController.enableSnapToGround(1);
 
+    const rotation = new THREE.Quaternion().setFromAxisAngle(
+      new THREE.Vector3(0, 1, 0),
+      this.rotationY,
+    );
+
     const newPosition = new THREE.Vector3()
       .copy(this.rigidBody.translation())
       .add(this.characterController.computedMovement());
 
     this.rigidBody.setNextKinematicTranslation(newPosition);
+    this.rigidBody.setNextKinematicRotation(rotation);
 
-    this.instance.position.copy(this.rigidBody.translation());
+    this.model.position.copy(this.rigidBody.translation());
+    this.model.quaternion.copy(this.rigidBody.rotation());
 
-    this.camera.updateCamera(this.instance);
+    this.camera.updateCamera(this.model);
   }
 }

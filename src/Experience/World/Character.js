@@ -18,8 +18,8 @@ export default class Character {
     // movement tuning (units per second)
     this.right_foot_up = false;
     this.left_foot_up = false;
-    this.walkSpeed = 5;
-    this.runSpeed = 10;
+    this.walkSpeed = 10;
+    this.runSpeed = 15;
     this.turnSpeed = 2.5;
     this.gravity = -9.81;
 
@@ -54,6 +54,10 @@ export default class Character {
     this.setSound();
     this.setInstance();
     this.setAnimation();
+
+    this.pointLight = new THREE.PointLight(0xffce3c, 200);
+    this.pointLight.position.set(1, 5, -3);
+    this.instance.add(this.pointLight);
   }
 
   async setSound() {
@@ -95,8 +99,9 @@ export default class Character {
   }
 
   setInstance() {
+    this.instance = new THREE.Group();
     this.model = this.resource.scene;
-    this.model.position.set(0, 5, 30);
+    this.instance.position.set(0, 5, 30);
     this.model.scale.setScalar(5);
     this.rightFoot = this.model.getObjectByName("mixamorigRightFoot");
     this.leftFoot = this.model.getObjectByName("mixamorigLeftFoot");
@@ -113,13 +118,7 @@ export default class Character {
     this.leftFootProbe.position.set(0, 0, 0);
     this.rightFoot.add(this.rightFootProbe);
     this.leftFoot.add(this.leftFootProbe);
-    this.scene.add(this.model);
-
-    // Debug mesh (optional)
-    const geometry = new THREE.BoxGeometry(2, 4, 2);
-    const material = new FlexibleToonMaterial({ color: 0x00ff00 });
-    this.instance = new THREE.Mesh(geometry, material);
-    this.instance.visible = false;
+    this.instance.add(this.model);
     this.scene.add(this.instance);
 
     // Velocity-based kinematic body
@@ -130,8 +129,8 @@ export default class Character {
     this.collider = this.physics.world.createCollider(colDesc, this.rigidBody);
 
     // Sync initial transform
-    const pos = this.model.getWorldPosition(new THREE.Vector3());
-    const rot = this.model.getWorldQuaternion(new THREE.Quaternion());
+    const pos = this.instance.getWorldPosition(new THREE.Vector3());
+    const rot = this.instance.getWorldQuaternion(new THREE.Quaternion());
     this.rigidBody.setTranslation(pos);
     this.rigidBody.setRotation(rot);
 
@@ -238,10 +237,10 @@ export default class Character {
     this.rigidBody.setAngvel({ x: 0, y: angVelY, z: 0 }, true);
 
     // -------- Sync visuals --------
-    this.model.position.copy(this.rigidBody.translation());
-    this.model.quaternion.copy(this.rigidBody.rotation());
+    this.instance.position.copy(this.rigidBody.translation());
+    this.instance.quaternion.copy(this.rigidBody.rotation());
 
-    this.camera.updateCamera(this.model);
+    this.camera.updateCamera(this.instance);
     this.animation.mixer.update(dt);
 
     if (this.rightFootProbe.getWorldPosition(new THREE.Vector3()).y >= 1.3) {

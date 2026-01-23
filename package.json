@@ -9,9 +9,11 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "vite": "npm:rolldown-vite@7.2.5",
+    "@cloudflare/vite-plugin": "^1.21.2",
+    "vite": "npm:rolldown-vite@^7.2.5",
     "vite-plugin-glsl": "^1.5.5",
-    "vite-plugin-wasm": "^3.5.0"
+    "vite-plugin-wasm": "^3.5.0",
+    "wrangler": "^4.60.0"
   },
   "overrides": {
     "vite": "npm:rolldown-vite@7.2.5"

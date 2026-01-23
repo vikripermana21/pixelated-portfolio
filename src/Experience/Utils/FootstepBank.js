@@ -4,12 +4,10 @@ export default class FootstepBank {
   constructor(listener, buffers, poolSize = 6) {
     this.pool = buffers.flatMap((buffer) => {
       return Array.from({ length: poolSize }, () => {
-        const audio = new THREE.PositionalAudio(listener);
+        const audio = new THREE.Audio(listener);
         audio.setBuffer(buffer);
         audio.setLoop(false);
-        audio.setRefDistance(0.8);
-        audio.setRolloffFactor(2.5);
-        audio.setVolume(100);
+        audio.setVolume(0.5);
         return audio;
       });
     });
@@ -17,8 +15,9 @@ export default class FootstepBank {
     this.index = 0;
   }
 
-  play(parent) {
+  play(parent, volume = 1) {
     const audio = this.pool[this.index];
+    audio.setVolume(volume);
     this.index = (this.index + 1) % this.pool.length;
 
     if (audio.isPlaying) {

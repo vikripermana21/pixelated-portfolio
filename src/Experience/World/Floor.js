@@ -47,13 +47,14 @@ export default class Floor {
   }
 
   setInstance() {
-    this.geo = new THREE.PlaneGeometry(300, 300);
+    this.geo = new THREE.BoxGeometry(300, 300, 2);
     this.mat = new FlexibleToonMaterial({
       color: new THREE.Color(this.params.color),
       isGrass: false,
       step: this.params.step,
     });
     this.instance = new THREE.Mesh(this.geo, this.mat);
+    this.instance.position.y = -1;
     this.instance.rotation.x = -Math.PI / 2;
     this.instance.receiveShadow = true;
     this.scene.add(this.instance);

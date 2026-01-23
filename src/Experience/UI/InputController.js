@@ -21,6 +21,9 @@ export default class InputController {
     if (this.keyPressed[event.code]) return;
 
     switch (event.code) {
+      case "KeyE":
+        inputStore.setState({ touchGrace: true });
+        break;
       case "KeyW":
       case "ArrowUp":
         inputStore.setState({ forward: true });

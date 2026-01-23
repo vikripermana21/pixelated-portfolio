@@ -4,6 +4,7 @@ import { FlexibleToonMaterial } from "../Materials/FlexibleToonMaterial";
 import vertexShader from "../Shaders/Grace/grace.vert";
 import fragmentShader from "../Shaders/Grace/grace.frag";
 import gsap from "gsap";
+import { inputStore } from "../Utils/Store";
 
 export default class Grace {
   constructor() {
@@ -21,15 +22,21 @@ export default class Grace {
     this.sizes = this.experience.sizes;
     this.area = new THREE.Box3();
 
+    inputStore.subscribe((state) => {
+      this.touched = state.touchGrace;
+    });
+
     this.setInstance();
     this.setTweaks();
   }
 
   touch() {
-    if (!this.plane) {
-      this.sound.play();
-      this.setLight();
-    }
+    setTimeout(() => {
+      if (!this.plane) {
+        this.sound.play();
+        this.setLight();
+      }
+    }, 2000);
   }
 
   setInstance() {
@@ -108,7 +115,8 @@ export default class Grace {
     if (
       this.area.intersectsBox(
         this.experience.world.character.area.expandByScalar(10),
-      )
+      ) &&
+      this.touched
     ) {
       this.touch();
     }

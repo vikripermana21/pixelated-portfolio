@@ -1,7 +1,7 @@
-import Experience from "../Experience";
-import { FlexibleToonMaterial } from "../Materials/FlexibleToonMaterial";
-import { inputStore } from "../Utils/Store";
 import * as THREE from "three";
+import Experience from "../Experience";
+import FootstepBank from "../Utils/FootstepBank";
+import { inputStore } from "../Utils/Store";
 
 export default class Character {
   constructor() {
@@ -13,11 +13,42 @@ export default class Character {
     this.resources = this.experience.resources;
 
     this.resource = this.resources.items.characterModel;
-    this.speed = 0.01;
-    this.area = new THREE.Box3();
-    this.rotationY = 0;
-    this.turnSpeed = 0.003;
 
+    // ---- State ----
+    this.forward = false;
+    this.backward = false;
+    this.left = false;
+    this.right = false;
+    this.run = false;
+    this.touchGrace = false;
+    this.prevTouchGrace = false;
+
+    // ---- Movement tuning ----
+    this.walkSpeed = 10;
+    this.runSpeed = 20;
+    this.turnSpeed = 5.5;
+    this.gravity = -9.81;
+
+    // ---- Footstep state ----
+    this.rightFootUp = false;
+    this.leftFootUp = false;
+
+    // ---- Area (Box3) ----
+    this.area = new THREE.Box3();
+
+    // ---- Init ----
+    this.initInput();
+    this.initSound();
+    this.initModel();
+    this.initPhysics();
+    this.initAnimation();
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*                                    INPUT                                   */
+  /* -------------------------------------------------------------------------- */
+
+  initInput() {
     inputStore.subscribe((state) => {
       this.forward = state.forward;
       this.backward = state.backward;
@@ -25,152 +56,260 @@ export default class Character {
       this.right = state.right;
       this.run = state.run;
 
-      if (this.run) {
-        this.animation.play("running");
+      const pressed = state.touchGrace && !this.prevTouchGrace;
+      this.prevTouchGrace = state.touchGrace;
+
+      if (pressed) {
+        this.touchGrace = true;
+
+        this.animation.playChain(
+          ["kneeling", "standing"],
+          () => (this.touchGrace = false),
+        );
+        return;
+      }
+
+      if (this.animation.isLocked) return;
+
+      if (this.forward) {
+        this.animation.play(this.run ? "running" : "walking");
       } else {
-        this.animation.play("walking");
+        this.animation.play("idle");
       }
     });
-
-    this.setInstance();
-    this.setAnimation();
   }
 
-  setInstance() {
+  /* -------------------------------------------------------------------------- */
+  /*                                    SOUND                                   */
+  /* -------------------------------------------------------------------------- */
+
+  async initSound() {
+    this.listener = new THREE.AudioListener();
+    this.camera.instance.add(this.listener);
+
+    this.audioLoader = new THREE.AudioLoader();
+    const buffers = await Promise.all(
+      [
+        "/audio/grass_walk_1.wav",
+        "/audio/grass_walk_2.wav",
+        "/audio/grass_walk_3.wav",
+        "/audio/grass_walk_4.wav",
+        "/audio/grass_walk_5.wav",
+        "/audio/grass_walk_6.wav",
+      ].map(
+        (path) =>
+          new Promise((resolve) =>
+            this.audioLoader.load(path, (buffer) => resolve(buffer)),
+          ),
+      ),
+    );
+
+    this.audio = new FootstepBank(this.listener, buffers);
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*                                    MODEL                                   */
+  /* -------------------------------------------------------------------------- */
+
+  initModel() {
+    this.instance = new THREE.Group();
     this.model = this.resource.scene;
-    this.model.position.set(0, 20, 30);
+
+    this.instance.position.set(0, 5, 30);
     this.model.scale.setScalar(5);
-    const geometry = new THREE.BoxGeometry(2, 4, 2);
-    const material = new FlexibleToonMaterial({
-      color: 0x00ff00,
-      wireframe: false,
-    });
-    this.instance = new THREE.Mesh(geometry, material);
-    this.instance.position.set(0, 20, 30);
-    this.instance.castShadow = true;
-    this.scene.add(this.model);
 
-    // create a rigid body
-    this.rigidBodyType =
-      this.physics.rapier.RigidBodyDesc.kinematicPositionBased();
-    this.rigidBody = this.physics.world.createRigidBody(this.rigidBodyType);
+    this.scene.add(this.instance);
+    this.instance.add(this.model);
 
-    // create a collider
-    this.colliderType = this.physics.rapier.ColliderDesc.cuboid(
-      2 / 2,
-      4 / 2,
-      2 / 2,
+    this.rightFoot = this.model.getObjectByName("mixamorigRightFoot");
+    this.leftFoot = this.model.getObjectByName("mixamorigLeftFoot");
+
+    this.rightFootProbe = this.createFootProbe();
+    this.leftFootProbe = this.createFootProbe();
+
+    this.rightFoot.add(this.rightFootProbe);
+    this.leftFoot.add(this.leftFootProbe);
+
+    this.pointLight = new THREE.PointLight(0xffce3c, 200);
+    this.pointLight.position.set(1, 5, -3);
+    this.instance.add(this.pointLight);
+  }
+
+  createFootProbe() {
+    return new THREE.Mesh(
+      new THREE.BoxGeometry(1, 1, 1),
+      new THREE.MeshBasicMaterial({ visible: false }),
     );
-    this.collider = this.physics.world.createCollider(
-      this.colliderType,
-      this.rigidBody,
-    );
+  }
 
-    // set rigid body position to character position
-    const worldPosition = this.model.getWorldPosition(new THREE.Vector3());
-    const worldRotation = this.model.getWorldQuaternion(new THREE.Quaternion());
+  /* -------------------------------------------------------------------------- */
+  /*                                   PHYSICS                                  */
+  /* -------------------------------------------------------------------------- */
 
-    this.rigidBody.setTranslation(worldPosition);
-    this.rigidBody.setRotation(worldRotation);
+  initPhysics() {
+    const rbDesc = this.physics.rapier.RigidBodyDesc.kinematicVelocityBased();
+    this.rigidBody = this.physics.world.createRigidBody(rbDesc);
+
+    const colDesc = this.physics.rapier.ColliderDesc.cuboid(1.5, 0.5, 1.5);
+    this.collider = this.physics.world.createCollider(colDesc, this.rigidBody);
+
+    const pos = this.instance.getWorldPosition(new THREE.Vector3());
+    const rot = this.instance.getWorldQuaternion(new THREE.Quaternion());
+    this.rigidBody.setTranslation(pos);
+    this.rigidBody.setRotation(rot);
 
     this.characterController =
       this.physics.world.createCharacterController(0.01);
+    this.characterController.setApplyImpulsesToDynamicBodies(true);
   }
 
-  setAnimation() {
-    this.animation = {};
+  /* -------------------------------------------------------------------------- */
+  /*                                 ANIMATION                                  */
+  /* -------------------------------------------------------------------------- */
 
-    // Mixer
-    this.animation.mixer = new THREE.AnimationMixer(this.model);
+  initAnimation() {
+    this.animation = {
+      mixer: new THREE.AnimationMixer(this.model),
+      actions: {},
+      current: null,
+      isLocked: false,
+    };
 
-    // Actions
-    this.animation.actions = {};
+    const get = (name) => this.resource.animations.find((a) => a.name === name);
 
-    this.animation.actions.walking = this.animation.mixer.clipAction(
-      this.resource.animations[1],
-    );
-    this.animation.actions.running = this.animation.mixer.clipAction(
-      this.resource.animations[0],
-    );
+    const A = this.animation.actions;
+    A.idle = this.animation.mixer.clipAction(get("IDLE"));
+    A.walking = this.animation.mixer.clipAction(get("WALKING"));
+    A.running = this.animation.mixer.clipAction(get("RUNNING"));
+    A.kneeling = this.animation.mixer.clipAction(get("KNEELING"));
+    A.standing = this.animation.mixer.clipAction(get("STANDING"));
 
-    this.animation.actions.current = this.animation.actions.walking;
-    this.animation.actions.current.play();
+    this.animation.current = A.idle;
+    A.idle.play();
 
-    // Play the action
     this.animation.play = (name) => {
-      const newAction = this.animation.actions[name];
-      const oldAction = this.animation.actions.current;
+      if (this.animation.isLocked) return;
 
-      if (newAction === oldAction) return;
+      const next = A[name];
+      if (!next || next === this.animation.current) return;
 
-      newAction.reset();
-      newAction.play();
-      newAction.crossFadeFrom(oldAction, 1);
+      next.reset().play();
+      next.crossFadeFrom(this.animation.current, 0.3, false);
+      this.animation.current = next;
+    };
 
-      this.animation.actions.current = newAction;
+    this.animation.playOnce = (name) =>
+      new Promise((resolve) => {
+        const action = A[name];
+        if (!action) return resolve();
+
+        action.reset();
+        action.setLoop(THREE.LoopOnce, 1);
+        action.clampWhenFinished = true;
+        action.play();
+
+        action.crossFadeFrom(this.animation.current, 0.3, false);
+        this.animation.current = action;
+
+        const onFinished = (e) => {
+          if (e.action === action) {
+            this.animation.mixer.removeEventListener("finished", onFinished);
+            resolve();
+          }
+        };
+
+        this.animation.mixer.addEventListener("finished", onFinished);
+      });
+
+    this.animation.playChain = async (names, onFinished) => {
+      if (this.animation.isLocked) return;
+
+      this.animation.isLocked = true;
+
+      for (const name of names) {
+        await this.animation.playOnce(name);
+      }
+
+      this.animation.isLocked = false;
+      this.animation.play("idle");
+      onFinished?.();
     };
   }
 
+  /* -------------------------------------------------------------------------- */
+  /*                                   UPDATE                                   */
+  /* -------------------------------------------------------------------------- */
+
   update() {
+    const dt = this.time.delta * 0.001;
+
     this.area.setFromObject(this.model);
-    const movement = new THREE.Vector3();
-    let speed = 0.01;
-    const forward = new THREE.Vector3(0, 0, -1);
-    forward.applyAxisAngle(new THREE.Vector3(0, 1, 0), this.rotationY);
 
-    // if (this.forward) {
-    //   movement.z -= 1;
-    // }
-    // if (this.backward) {
-    //   movement.z += 1;
-    // }
-    if (this.forward) {
-      movement.add(forward);
-    }
+    this.updateMovement(dt);
+    this.updateRotation();
+    this.syncVisuals();
+    this.updateFootsteps();
 
-    if (this.backward) {
-      movement.sub(forward);
-    }
-    // if (this.left) {
-    //   movement.x -= 1;
-    // }
-    // if (this.right) {
-    //   movement.x += 1;
-    // }
-    if (this.left) {
-      this.rotationY += this.time.delta * this.turnSpeed;
-    }
+    this.animation.mixer.update(dt);
+  }
 
-    if (this.right) {
-      this.rotationY -= this.time.delta * this.turnSpeed;
-    }
-    if (this.run) {
-      speed += 0.01;
-    }
-
-    movement.normalize().multiplyScalar(this.time.delta * speed);
-    movement.y = -1;
-    this.characterController.computeColliderMovement(this.collider, movement);
-    this.characterController.setApplyImpulsesToDynamicBodies(true);
-    // this.characterController.enableAutostep(3, 0.1, true);
-    // this.characterController.enableSnapToGround(1);
-
-    const rotation = new THREE.Quaternion().setFromAxisAngle(
-      new THREE.Vector3(0, 1, 0),
-      this.rotationY,
+  updateMovement(dt) {
+    const rbRot = this.rigidBody.rotation();
+    const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(
+      new THREE.Quaternion(rbRot.x, rbRot.y, rbRot.z, rbRot.w),
     );
 
-    const newPosition = new THREE.Vector3()
-      .copy(this.rigidBody.translation())
-      .add(this.characterController.computedMovement());
+    const velocity = new THREE.Vector3();
 
-    this.rigidBody.setNextKinematicTranslation(newPosition);
-    this.rigidBody.setNextKinematicRotation(rotation);
+    if (this.forward && !this.touchGrace) {
+      velocity.add(
+        forward.multiplyScalar(this.run ? this.runSpeed : this.walkSpeed),
+      );
+    }
 
-    this.model.position.copy(this.rigidBody.translation());
-    this.model.quaternion.copy(this.rigidBody.rotation());
+    velocity.y = this.gravity;
 
-    this.camera.updateCamera(this.model);
-    this.animation.mixer.update(this.time.delta * 0.001);
+    const frameMove = velocity.clone().multiplyScalar(dt);
+    this.characterController.computeColliderMovement(this.collider, frameMove);
+
+    const move = this.characterController.computedMovement();
+    this.rigidBody.setLinvel(
+      { x: move.x / dt, y: move.y / dt, z: move.z / dt },
+      true,
+    );
+  }
+
+  updateRotation() {
+    if (this.touchGrace) return;
+
+    let y = 0;
+    if (this.left) y = this.turnSpeed;
+    if (this.right) y = -this.turnSpeed;
+
+    this.rigidBody.setAngvel({ x: 0, y, z: 0 }, true);
+  }
+
+  syncVisuals() {
+    this.instance.position.copy(this.rigidBody.translation());
+    this.instance.quaternion.copy(this.rigidBody.rotation());
+    this.camera.updateCamera(this.instance);
+  }
+
+  updateFootsteps() {
+    const rightY = this.rightFootProbe.getWorldPosition(new THREE.Vector3()).y;
+    const leftY = this.leftFootProbe.getWorldPosition(new THREE.Vector3()).y;
+
+    if (rightY >= 1.3) this.rightFootUp = true;
+    if (leftY >= 1.3) this.leftFootUp = true;
+
+    if (this.rightFootUp && rightY <= 1.1) {
+      this.rightFootUp = false;
+      this.audio.play(this.rightFootProbe, this.run ? 1.0 : 0.5);
+    }
+
+    if (this.leftFootUp && leftY <= 1.1) {
+      this.leftFootUp = false;
+      this.audio.play(this.leftFootProbe, this.run ? 1.0 : 0.5);
+    }
   }
 }

@@ -1,7 +1,6 @@
 import Experience from "../Experience";
 import * as THREE from "three";
 import { FlexibleToonMaterial } from "../Materials/FlexibleToonMaterial";
-import { color } from "three/src/nodes/TSL.js";
 
 export default class Grass {
   constructor() {
@@ -60,9 +59,9 @@ export default class Grass {
     this.matrix = new THREE.Matrix4();
 
     for (let i = 0; i < this.count; i++) {
-      this.dummy.position.x = (0.5 - Math.random()) * 200;
+      this.dummy.position.x = (0.5 - Math.random()) * 50;
       this.dummy.position.y = 1.5 / 2;
-      this.dummy.position.z = (0.5 - Math.random()) * 200;
+      this.dummy.position.z = (0.5 - Math.random()) * 50;
       this.dummy.updateMatrix();
       this.instance.setMatrixAt(i, this.dummy.matrix);
     }

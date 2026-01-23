@@ -5,6 +5,11 @@ export default [
     path: "models/pillars/pillars.gltf",
   },
   {
+    name: "characterModel",
+    type: "gltfModel",
+    path: "models/character/character.gltf",
+  },
+  {
     name: "gradientMap",
     type: "texture",
     path: "textures/fiveTone.jpg",

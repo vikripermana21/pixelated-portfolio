@@ -8,32 +8,33 @@ import gsap from "gsap";
 export default class Grace {
   constructor() {
     this.sound = new Audio("/audio/grace.mp3");
-    this.sound.volume = 0.2;
+    this.sound.volume = 0.7;
     this.params = {
       uColor: "#ffce3c",
     };
     this.experience = new Experience();
     this.scene = this.experience.scene;
+    this.world = this.experience.world;
     this.time = this.experience.time;
     this.camera = this.experience.camera;
     this.debug = this.experience.debug;
     this.sizes = this.experience.sizes;
+    this.area = new THREE.Box3();
 
     this.setInstance();
-
-    window.addEventListener("click", () => {
-      if (!this.plane) {
-        this.sound.play();
-        this.setLight();
-      }
-    });
-
     this.setTweaks();
+  }
+
+  touch() {
+    if (!this.plane) {
+      this.sound.play();
+      this.setLight();
+    }
   }
 
   setInstance() {
     this.instance = new THREE.Group();
-    this.geo = new THREE.BoxGeometry(1, 2, 1);
+    this.geo = new THREE.BoxGeometry(0.5, 1, 0.5);
     this.mat = new FlexibleToonMaterial({
       color: new THREE.Color(this.params.uColor),
     });
@@ -101,6 +102,15 @@ export default class Grace {
       this.plane.position.copy(this.mesh.position);
       this.plane.lookAt(this.camera.instance.position);
       this.pointLight.position.y = 15 + Math.sin(this.time.elapsed * 0.001) * 2;
+    }
+    this.area.setFromObject(this.instance);
+
+    if (
+      this.area.intersectsBox(
+        this.experience.world.character.area.expandByScalar(10),
+      )
+    ) {
+      this.touch();
     }
   }
 }

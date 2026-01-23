@@ -93,10 +93,10 @@ export default class Environment {
     this.directionalLight.castShadow = true;
     this.directionalLight.shadow.mapSize.width = 4096;
     this.directionalLight.shadow.mapSize.height = 4096;
-    this.directionalLight.shadow.camera.left = -100;
-    this.directionalLight.shadow.camera.right = 100;
-    this.directionalLight.shadow.camera.top = 100;
-    this.directionalLight.shadow.camera.bottom = -100;
+    this.directionalLight.shadow.camera.left = -300;
+    this.directionalLight.shadow.camera.right = 300;
+    this.directionalLight.shadow.camera.top = 300;
+    this.directionalLight.shadow.camera.bottom = -300;
     this.directionalLight.shadow.camera.near = -1;
     this.directionalLight.shadow.camera.far = 1000;
     this.scene.add(this.directionalLight);

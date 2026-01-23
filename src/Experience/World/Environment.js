@@ -16,6 +16,14 @@ export default class Environment {
     this.scene = this.experience.scene;
     this.time = this.experience.time;
 
+    window.addEventListener("click", () => {
+      gsap.to(this.params, {
+        directionalLightIntensity: 4,
+        duration: 2,
+        ease: "sine.inOut",
+      });
+    });
+
     this.setTweaks();
     this.setAmbientLight();
     this.setDirectionalLight();

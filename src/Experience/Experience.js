@@ -10,6 +10,7 @@ import Debug from "./Utils/Debug";
 import Composer from "./Composer";
 import Physics from "./World/Physics";
 import InputController from "./UI/InputController";
+import Stats from "three/examples/jsm/libs/stats.module.js";
 
 let instance;
 export default class Experience {
@@ -21,6 +22,10 @@ export default class Experience {
     instance = this;
 
     this.outlineObject = [];
+
+    this.stats = new Stats();
+    this.stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+    document.body.appendChild(this.stats.dom);
 
     this.canvas = _canvas;
     this.bloomLayer = new THREE.Layers();
@@ -52,8 +57,10 @@ export default class Experience {
   }
 
   update() {
+    this.stats.begin();
     this.camera.update();
     this.world.update();
     this.composer.update();
+    this.stats.end();
   }
 }

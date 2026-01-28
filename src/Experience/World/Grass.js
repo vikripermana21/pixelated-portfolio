@@ -5,11 +5,12 @@ import { FlexibleToonMaterial } from "../Materials/FlexibleToonMaterial";
 export default class Grass {
   constructor() {
     this.params = {
-      color: "#2e8b57",
+      color: "#5c9237",
     };
-    this.count = 1000;
+    this.count = 100000;
     this.experience = new Experience();
     this.scene = this.experience.scene;
+    this.time = this.experience.time;
     this.camera = this.experience.camera;
     this.debug = this.experience.debug;
     this.resources = this.experience.resources;
@@ -59,9 +60,12 @@ export default class Grass {
     this.matrix = new THREE.Matrix4();
 
     for (let i = 0; i < this.count; i++) {
-      this.dummy.position.x = (0.5 - Math.random()) * 50;
+      this.dummy.position.x = (0.5 - Math.random()) * 300;
       this.dummy.position.y = 1.5 / 2;
-      this.dummy.position.z = (0.5 - Math.random()) * 50;
+      this.dummy.position.z = (0.5 - Math.random()) * 300;
+
+      this.dummy.lookAt(new THREE.Vector3(300, 0, 300));
+
       this.dummy.updateMatrix();
       this.instance.setMatrixAt(i, this.dummy.matrix);
     }
@@ -69,24 +73,25 @@ export default class Grass {
   }
 
   update() {
-    for (let i = 0; i < this.count; i++) {
-      this.instance.getMatrixAt(i, this.matrix);
-      this.matrix.decompose(
-        this.dummy.position,
-        this.dummy.rotation,
-        this.dummy.scale,
-        this.dummy.receiveShadow,
-      );
+    this.mat.time = this.time.elapsed * 0.001;
+    // for (let i = 0; i < this.count; i++) {
+    //   this.instance.getMatrixAt(i, this.matrix);
+    //   this.matrix.decompose(
+    //     this.dummy.position,
+    //     this.dummy.rotation,
+    //     this.dummy.scale,
+    //     this.dummy.receiveShadow,
+    //   );
 
-      this.dummy.lookAt(
-        this.camera.instance.position.x,
-        0,
-        this.camera.instance.position.z,
-      );
+    //   this.dummy.lookAt(
+    //     this.camera.instance.position.x,
+    //     0,
+    //     this.camera.instance.position.z,
+    //   );
 
-      this.dummy.updateMatrix();
-      this.instance.setMatrixAt(i, this.dummy.matrix);
-    }
+    //   this.dummy.updateMatrix();
+    //   this.instance.setMatrixAt(i, this.dummy.matrix);
+    // }
     this.instance.instanceMatrix.needsUpdate = true;
   }
 }

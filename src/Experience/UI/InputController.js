@@ -5,6 +5,11 @@ export default class InputController {
     this.startListening();
     this.inputStore = inputStore;
     this.keyPressed = {};
+    this.isClicking = false;
+
+    inputStore.subscribe((state) => {
+      this.isClicking = state.isClicking;
+    });
   }
 
   startListening() {
@@ -15,6 +20,41 @@ export default class InputController {
     window.addEventListener("keyup", (event) => {
       this.onKeyUp(event);
     });
+
+    // window.addEventListener("mousedown", (event) => {
+    //   inputStore.setState({ isClicking: true, mouse: event });
+    //   // this.onTouchMove(event);
+    // });
+    //
+    // window.addEventListener("mousemove", (event) => {
+    //   // this.onTouchMove(event);
+    // });
+    //
+    // window.addEventListener("mouseup", (event) => {
+    //   inputStore.setState({ isClicking: false, mouse: event });
+    // });
+
+    window.addEventListener("touchstart", (event) => {
+      inputStore.setState({ isClicking: true, mouse: event });
+      this.onTouchMove(event);
+    });
+
+    window.addEventListener("touchmove", (event) => {
+      this.onTouchMove(event);
+    });
+    window.addEventListener("touchend", (event) => {
+      inputStore.setState({ isClicking: false });
+      this.onTouchMove(event);
+    });
+  }
+
+  onTouchMove(event) {
+    const x = event?.changedTouches?.[0]?.pageX / window.innerWidth;
+    const y = event?.changedTouches?.[0]?.pageY / window.innerHeight;
+
+    if (this.isClicking) {
+      inputStore.setState({ mouse: { x, y } });
+    }
   }
 
   onKeyDown(event) {

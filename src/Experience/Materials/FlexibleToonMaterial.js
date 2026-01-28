@@ -5,39 +5,187 @@ export class FlexibleToonMaterial extends THREE.MeshToonMaterial {
     super(params);
 
     this.userData.isGrass = params.isGrass;
+    this.userData.uTime = params.time ?? 0.0;
     this.userData.uStep = params.step ?? 10.0;
+    this.userData.uNoiseScale = params.noiseScale ?? 0.07;
+    this.userData.uNoiseStrength = params.noiseStrength ?? 0.3;
 
     this._shader = null;
 
     this.onBeforeCompile = (shader) => {
       this._shader = shader;
+
+      shader.uniforms.uTime = { value: this.userData.uTime };
       shader.uniforms.uStep = { value: this.userData.uStep };
       shader.uniforms.IS_GRASS = { value: this.userData.isGrass };
+      shader.uniforms.uNoiseScale = { value: this.userData.uNoiseScale };
+      shader.uniforms.uNoiseStrength = { value: this.userData.uNoiseStrength };
+      shader.uniforms.uWindStrength = { value: 1.35 };
+      shader.uniforms.uWindSpeed = { value: 0.5 };
+      shader.uniforms.uWindStep = { value: 6.0 };
 
       shader.vertexShader = shader.vertexShader.replace(
         "#include <common>",
         `#include <common>
-            varying vec4 vShadowCoord;
+
+        uniform float uTime;
+        uniform float uWindStrength;
+          uniform float uWindSpeed;
+          uniform float uWindStep;
+
+        varying vec4 vShadowCoord;
+            varying vec3 vWorldPosition;
+
+            // Hash
+                    float hash(vec3 p) {
+                      p = fract(p * 0.3183099 + vec3(0.1));
+                      p *= 17.0;
+                      return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+                    }
             `,
+      );
+
+      shader.vertexShader = shader.vertexShader.replace(
+        "#include <worldpos_vertex>",
+        `#include <worldpos_vertex>
+         vWorldPosition = worldPosition.xyz;
+        `,
       );
 
       if (this.userData.isGrass) {
         shader.vertexShader = shader.vertexShader.replace(
+          "#include <begin_vertex>",
+          `
+          vec3 transformed = position;
+
+            // Instance world position
+            vec3 instancePosition = instanceMatrix[3].xyz;
+
+            // 🌱 Per-instance random offset (stable)
+            float instanceSeed = hash(instancePosition);
+
+            // ⏱ Stepped time (toon-style animation)
+            float t = floor((uTime * uWindSpeed + instanceSeed * 10.0) * uWindStep) / uWindStep;
+
+            // 🌬 Wind wave (world-coherent)
+            float wind = sin(
+              instancePosition.x * 0.15 +
+              instancePosition.z * 0.15 +
+              t
+            );
+
+            // Blade stiffness (bottom fixed, top moves)
+            float heightFactor = uv.y;
+
+            // Apply wind (bend sideways)
+            transformed.x += wind * uWindStrength * heightFactor;
+            transformed.z += wind * uWindStrength * 0.5 * heightFactor;                `,
+        );
+        shader.vertexShader = shader.vertexShader.replace(
           "#include <shadowmap_vertex>",
           `#include <shadowmap_vertex>
-        vec4 worldOrigin = modelMatrix * instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0);
+          vec4 worldOrigin = modelMatrix * instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0);
         vShadowCoord = directionalShadowMatrix[0] * worldOrigin;
 `,
         );
       }
 
+      // shader.fragmentShader = shader.fragmentShader.replace(
+      //   "#include <common>",
+      //   `#include <common>
+
+      //     uniform float uTime;
+      //     uniform float uStep;
+      //     uniform bool IS_GRASS;
+      //     uniform float uNoiseScale;
+      //     uniform float uNoiseStrength;
+
+      //     varying vec4 vShadowCoord;
+      //     varying vec3 vWorldPosition;
+
+      //     // Simple hash
+      //     float hash(vec3 p) {
+      //       p = fract(p * 0.3183099 + vec3(0.1,0.1,0.1));
+      //       p *= 17.0;
+      //       return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+      //     }
+
+      //     // Value noise
+      //     float noise(vec3 x) {
+      //       vec3 i = floor(x);
+      //       vec3 f = fract(x);
+      //       f = f * f * (3.0 - 2.0 * f);
+
+      //       return mix(
+      //         mix(
+      //           mix(hash(i + vec3(0,0,0)), hash(i + vec3(1,0,0)), f.x),
+      //           mix(hash(i + vec3(0,1,0)), hash(i + vec3(1,1,0)), f.x),
+      //           f.y
+      //         ),
+      //         mix(
+      //           mix(hash(i + vec3(0,0,1)), hash(i + vec3(1,0,1)), f.x),
+      //           mix(hash(i + vec3(0,1,1)), hash(i + vec3(1,1,1)), f.x),
+      //           f.y
+      //         ),
+      //         f.z
+      //       );
+      //     }`,
+      // );
+
       shader.fragmentShader = shader.fragmentShader.replace(
         "#include <common>",
         `#include <common>
-            uniform float uStep;
-            uniform bool IS_GRASS;
-            varying vec4 vShadowCoord;
-            `,
+
+        uniform float uTime;
+        uniform float uStep;
+        uniform float uNoiseScale;
+        uniform float uNoiseStrength;
+
+        varying vec3 vWorldPosition;
+        varying vec4 vShadowCoord;
+
+        // Hash
+        float hash(vec3 p) {
+          p = fract(p * 0.3183099 + vec3(0.1));
+          p *= 17.0;
+          return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+        }
+
+        // Smooth value noise
+        float valueNoise(vec3 p) {
+          vec3 i = floor(p);
+          vec3 f = fract(p);
+          f = f * f * (3.0 - 2.0 * f);
+
+          return mix(
+            mix(
+              mix(hash(i + vec3(0,0,0)), hash(i + vec3(1,0,0)), f.x),
+              mix(hash(i + vec3(0,1,0)), hash(i + vec3(1,1,0)), f.x),
+              f.y
+            ),
+            mix(
+              mix(hash(i + vec3(0,0,1)), hash(i + vec3(1,0,1)), f.x),
+              mix(hash(i + vec3(0,1,1)), hash(i + vec3(1,1,1)), f.x),
+              f.y
+            ),
+            f.z
+          );
+        }
+
+        // ☁️ Cloud FBM
+        float fbm(vec3 p) {
+          float value = 0.0;
+          float amplitude = 0.5;
+
+          for (int i = 0; i < 5; i++) {
+            value += amplitude * valueNoise(p);
+            p *= 2.0;
+            amplitude *= 0.5;
+          }
+
+          return value;
+        }
+        `,
       );
 
       if (this.userData.isGrass) {
@@ -281,23 +429,78 @@ export class FlexibleToonMaterial extends THREE.MeshToonMaterial {
       shader.fragmentShader = shader.fragmentShader.replace(
         "#include <aomap_fragment>",
         `#include <aomap_fragment>
-              // Step ONLY direct light (exclude ambient / hemi / probes)
-                  float directIntensity = max(
-                    reflectedLight.directDiffuse.r,
-                    max(
-                      reflectedLight.directDiffuse.g,
-                      reflectedLight.directDiffuse.b
-                    )
-                  );
 
-                  directIntensity = floor(directIntensity * uStep) / uStep;
+        float directIntensity = max(
+          reflectedLight.directDiffuse.r,
+          max(
+            reflectedLight.directDiffuse.g,
+            reflectedLight.directDiffuse.b
+          )
+        );
 
-                  reflectedLight.directDiffuse *= directIntensity;
+        // 🌱 World-space noise
+        vec3 wPosition = vWorldPosition;
+        wPosition.x += uTime;
 
-              `,
+        // ☁️ Cloud noise in world space (XZ plane)
+          float cloud = fbm(vec3(wPosition.xz * uNoiseScale, 0.0));
+
+          // Center + strength
+            cloud = (cloud - 0.5) * uNoiseStrength;
+
+            directIntensity += cloud;
+
+
+        directIntensity = clamp(directIntensity, 0.0, 1.0);
+        directIntensity = floor(directIntensity * uStep) / uStep;
+
+        reflectedLight.directDiffuse *= directIntensity;
+        `,
       );
+
+      // shader.fragmentShader = shader.fragmentShader.replace(
+      //   "#include <aomap_fragment>",
+      //   `#include <aomap_fragment>
+      //         // Step ONLY direct light (exclude ambient / hemi / probes)
+      //             float directIntensity = max(
+      //               reflectedLight.directDiffuse.r,
+      //               max(
+      //                 reflectedLight.directDiffuse.g,
+      //                 reflectedLight.directDiffuse.b
+      //               )
+      //             );
+
+      //             directIntensity = floor(directIntensity * uStep) / uStep;
+
+      //             reflectedLight.directDiffuse *= directIntensity;
+
+      //         `,
+      // );
     };
   }
+
+  set noiseScale(value) {
+    this.userData.uNoiseScale = value;
+    if (this._shader) {
+      this._shader.uniforms.uNoiseScale.value = value;
+    }
+  }
+
+  get noiseScale() {
+    return this.userData.uNoiseScale;
+  }
+
+  set noiseStrength(value) {
+    this.userData.uNoiseStrength = value;
+    if (this._shader) {
+      this._shader.uniforms.uNoiseStrength.value = value;
+    }
+  }
+
+  get noiseStrength() {
+    return this.userData.uNoiseStrength;
+  }
+
   set step(value) {
     this.userData.uStep = value;
     if (this._shader) {
@@ -306,6 +509,17 @@ export class FlexibleToonMaterial extends THREE.MeshToonMaterial {
   }
 
   get step() {
+    return this.userData.uStep;
+  }
+
+  set time(value) {
+    this.userData.uTime = value;
+    if (this._shader) {
+      this._shader.uniforms.uTime.value = value;
+    }
+  }
+
+  get time() {
     return this.userData.uStep;
   }
 }

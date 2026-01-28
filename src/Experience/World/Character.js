@@ -3,6 +3,27 @@ import Experience from "../Experience";
 import FootstepBank from "../Utils/FootstepBank";
 import { inputStore } from "../Utils/Store";
 
+const normalizeAngle = (angle) => {
+  while (angle > Math.PI) angle -= 2 * Math.PI;
+  while (angle < -Math.PI) angle += 2 * Math.PI;
+  return angle;
+};
+
+const lerpAngle = (start, end, t) => {
+  start = normalizeAngle(start);
+  end = normalizeAngle(end);
+
+  if (Math.abs(end - start) > Math.PI) {
+    if (end > start) {
+      start += 2 * Math.PI;
+    } else {
+      end += 2 * Math.PI;
+    }
+  }
+
+  return normalizeAngle(start + (end - start) * t);
+};
+
 export default class Character {
   constructor() {
     this.experience = new Experience();
@@ -26,8 +47,10 @@ export default class Character {
     // ---- Movement tuning ----
     this.walkSpeed = 10;
     this.runSpeed = 20;
-    this.turnSpeed = 5.5;
+    this.turnSpeed = 0.5;
+    this.currentYaw = 0;
     this.gravity = -9.81;
+    this.characterRotationTarget = 0;
 
     // ---- Footstep state ----
     this.rightFootUp = false;
@@ -55,6 +78,9 @@ export default class Character {
       this.left = state.left;
       this.right = state.right;
       this.run = state.run;
+      this.touchGrace = state.touchGrace;
+      this.mouse = state.mouse;
+      this.isClicking = state.isClicking;
 
       const pressed = state.touchGrace && !this.prevTouchGrace;
       this.prevTouchGrace = state.touchGrace;
@@ -62,20 +88,13 @@ export default class Character {
       if (pressed) {
         this.touchGrace = true;
 
-        this.animation.playChain(
-          ["kneeling", "standing"],
-          () => (this.touchGrace = false),
-        );
+        this.animation.playChain(["kneeling", "standing"], () => {
+          inputStore.setState({ touchGrace: false });
+        });
         return;
       }
 
       if (this.animation.isLocked) return;
-
-      if (this.forward) {
-        this.animation.play(this.run ? "running" : "walking");
-      } else {
-        this.animation.play("idle");
-      }
     });
   }
 
@@ -114,6 +133,11 @@ export default class Character {
   initModel() {
     this.instance = new THREE.Group();
     this.model = this.resource.scene;
+    this.model.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        child.castShadow = true;
+      }
+    });
 
     this.instance.position.set(0, 5, 30);
     this.model.scale.setScalar(5);
@@ -130,9 +154,9 @@ export default class Character {
     this.rightFoot.add(this.rightFootProbe);
     this.leftFoot.add(this.leftFootProbe);
 
-    this.pointLight = new THREE.PointLight(0xffce3c, 200);
-    this.pointLight.position.set(1, 5, -3);
-    this.instance.add(this.pointLight);
+    // this.pointLight = new THREE.PointLight(0xffce3c, 200);
+    // this.pointLight.position.set(1, 5, -3);
+    // this.instance.add(this.pointLight);
   }
 
   createFootProbe() {
@@ -154,7 +178,7 @@ export default class Character {
     this.collider = this.physics.world.createCollider(colDesc, this.rigidBody);
 
     const pos = this.instance.getWorldPosition(new THREE.Vector3());
-    const rot = this.instance.getWorldQuaternion(new THREE.Quaternion());
+    const rot = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, 0));
     this.rigidBody.setTranslation(pos);
     this.rigidBody.setRotation(rot);
 
@@ -246,7 +270,6 @@ export default class Character {
     this.area.setFromObject(this.model);
 
     this.updateMovement(dt);
-    this.updateRotation();
     this.syncVisuals();
     this.updateFootsteps();
 
@@ -254,22 +277,72 @@ export default class Character {
   }
 
   updateMovement(dt) {
-    const rbRot = this.rigidBody.rotation();
-    const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(
-      new THREE.Quaternion(rbRot.x, rbRot.y, rbRot.z, rbRot.w),
-    );
+    console.log(this.mouse);
+    const vel = new THREE.Vector3();
 
-    const velocity = new THREE.Vector3();
+    const movement = {
+      x: 0,
+      z: 0,
+    };
 
-    if (this.forward && !this.touchGrace) {
-      velocity.add(
-        forward.multiplyScalar(this.run ? this.runSpeed : this.walkSpeed),
-      );
+    vel.y = this.gravity;
+
+    let speed = this.run ? this.runSpeed : this.walkSpeed;
+
+    if (!this.touchGrace) {
+      if (this.forward) {
+        movement.z = 1;
+      }
+      if (this.backward) {
+        movement.z = -1;
+      }
+      if (this.isClicking) {
+        if (Math.abs(this.mouse.x) < 0.3) {
+          movement.x = 1;
+        }
+        if (Math.abs(this.mouse.x) > 0.7) {
+          movement.x = -this.mouse.x;
+        }
+        if (Math.abs(this.mouse.y) < 0.7) {
+          movement.z = this.mouse.y;
+        }
+        if (Math.abs(this.mouse.y) > 0.8) {
+          movement.z = -this.mouse.y;
+        }
+
+        // movement.z = this.mouse.y;
+        // if (Math.abs(movement.x) > 0.7 || Math.abs(movement.z) > 0.5) {
+        //   speed = this.runSpeed;
+        // }
+      }
+      if (this.left) {
+        movement.x = 1;
+      }
+      if (this.right) {
+        movement.x = -1;
+      }
     }
 
-    velocity.y = this.gravity;
+    if (movement.x !== 0 || movement.z !== 0) {
+      this.characterRotationTarget = Math.atan2(movement.x, movement.z);
+      vel.x = Math.sin(this.characterRotationTarget) * speed * -1;
+      vel.z = Math.cos(this.characterRotationTarget) * speed * -1;
+      if (speed === this.runSpeed) {
+        this.animation.play("running");
+      } else {
+        this.animation.play("walking");
+      }
+    } else {
+      this.animation.play("idle");
+    }
 
-    const frameMove = velocity.clone().multiplyScalar(dt);
+    this.instance.rotation.y = lerpAngle(
+      this.instance.rotation.y,
+      this.characterRotationTarget,
+      0.1,
+    );
+
+    const frameMove = vel.clone().multiplyScalar(dt);
     this.characterController.computeColliderMovement(this.collider, frameMove);
 
     const move = this.characterController.computedMovement();
@@ -279,19 +352,8 @@ export default class Character {
     );
   }
 
-  updateRotation() {
-    if (this.touchGrace) return;
-
-    let y = 0;
-    if (this.left) y = this.turnSpeed;
-    if (this.right) y = -this.turnSpeed;
-
-    this.rigidBody.setAngvel({ x: 0, y, z: 0 }, true);
-  }
-
   syncVisuals() {
     this.instance.position.copy(this.rigidBody.translation());
-    this.instance.quaternion.copy(this.rigidBody.rotation());
     this.camera.updateCamera(this.instance);
   }
 

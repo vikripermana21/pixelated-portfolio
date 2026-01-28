@@ -5,11 +5,12 @@ import { FlexibleToonMaterial } from "../Materials/FlexibleToonMaterial";
 export default class Grass3 {
   constructor() {
     this.params = {
-      color: "#27794b",
+      color: "#609a38",
     };
     this.count = 100;
     this.experience = new Experience();
     this.scene = this.experience.scene;
+    this.time = this.experience.time;
     this.camera = this.experience.camera;
     this.debug = this.experience.debug;
     this.resources = this.experience.resources;
@@ -34,7 +35,7 @@ export default class Grass3 {
   }
 
   setInstance() {
-    this.geo = new THREE.PlaneGeometry(1.5, 1.5);
+    this.geo = new THREE.PlaneGeometry(5, 5);
     this.mat = new FlexibleToonMaterial({
       color: new THREE.Color(this.params.color),
       alphaMap: this.alphaGrass3,
@@ -67,6 +68,8 @@ export default class Grass3 {
       this.dummy.position.x = (0.5 - Math.random()) * 200;
       this.dummy.position.y = 1.5 / 2;
       this.dummy.position.z = (0.5 - Math.random()) * 200;
+
+      this.dummy.lookAt(new THREE.Vector3(300, 0, 300));
       this.dummy.updateMatrix();
       this.instance.setMatrixAt(i, this.dummy.matrix);
     }
@@ -74,24 +77,7 @@ export default class Grass3 {
   }
 
   update() {
-    for (let i = 0; i < this.count; i++) {
-      this.instance.getMatrixAt(i, this.matrix);
-      this.matrix.decompose(
-        this.dummy.position,
-        this.dummy.rotation,
-        this.dummy.scale,
-        this.dummy.receiveShadow,
-      );
-
-      this.dummy.lookAt(
-        this.camera.instance.position.x,
-        0,
-        this.camera.instance.position.z,
-      );
-
-      this.dummy.updateMatrix();
-      this.instance.setMatrixAt(i, this.dummy.matrix);
-    }
+    this.mat.time = this.time.elapsed * 0.001;
     this.instance.instanceMatrix.needsUpdate = true;
   }
 }

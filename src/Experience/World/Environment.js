@@ -5,8 +5,8 @@ import * as THREE from "three";
 export default class Environment {
   constructor() {
     this.params = {
-      ambientLightIntensity: 0.2,
-      directionalLightIntensity: 0,
+      ambientLightIntensity: 1.0,
+      directionalLightIntensity: 4.0,
       pointLightIntensity: 0,
       pointLightColor: "#f8f3c7",
       pointLightDecay: 1,
@@ -82,13 +82,26 @@ export default class Environment {
     this.ambientLight = new THREE.AmbientLight();
     this.ambientLight.intensity = this.params.ambientLightIntensity;
     this.scene.add(this.ambientLight);
+
+    // gsap.to(this.ambientLight, {
+    //   intensity: 1.0,
+    //   ease: "sine.inOut",
+    //   duration: 5,
+    // });
+
+    // gsap.to(this.ambientLight, {
+    //   intensity: 0.2,
+    //   ease: "sine.inOut",
+    //   duration: 10,
+    //   delay: 10,
+    // });
   }
 
   setDirectionalLight() {
     this.directionalLight = new THREE.DirectionalLight();
-    this.directionalLight.position.x = 25;
-    this.directionalLight.position.y = 25;
-    this.directionalLight.position.z = -25;
+    this.directionalLight.position.x = 100;
+    this.directionalLight.position.y = 100;
+    this.directionalLight.position.z = -100;
     this.directionalLight.lookAt(new THREE.Vector3());
     this.directionalLight.castShadow = true;
     this.directionalLight.shadow.mapSize.width = 4096;
@@ -99,6 +112,9 @@ export default class Environment {
     this.directionalLight.shadow.camera.bottom = -300;
     this.directionalLight.shadow.camera.near = -1;
     this.directionalLight.shadow.camera.far = 1000;
+    this.directionalLight.shadow.bias = -0.0005;
+    this.directionalLight.shadow.normalBias = 0.02;
+
     this.scene.add(this.directionalLight);
     // this.directionalLightHelper = new THREE.DirectionalLightHelper(
     //   this.directionalLight,

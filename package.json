@@ -4,16 +4,14 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "vite --host",
+    "build": "vite build --base=/",
     "preview": "vite preview"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.21.2",
     "vite": "npm:rolldown-vite@^7.2.5",
     "vite-plugin-glsl": "^1.5.5",
-    "vite-plugin-wasm": "^3.5.0",
-    "wrangler": "^4.60.0"
+    "vite-plugin-wasm": "^3.5.0"
   },
   "dependencies": {
     "@dimforge/rapier3d": "*",

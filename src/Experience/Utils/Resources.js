@@ -23,6 +23,9 @@ export default class Resources extends EventEmitter {
 
     window.addEventListener("click", () => {
       gsap.to(this.loadingWrapper, { opacity: 0, duration: 3, ease: "sine" });
+      setTimeout(() => {
+        this.loadingWrapper.remove();
+      }, 3000);
     });
   }
 

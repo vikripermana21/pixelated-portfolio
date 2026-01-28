@@ -50,6 +50,7 @@ export default class Character {
     this.turnSpeed = 0.5;
     this.currentYaw = 0;
     this.gravity = -9.81;
+    this.characterRotationTarget = 0;
 
     // ---- Footstep state ----
     this.rightFootUp = false;
@@ -78,6 +79,8 @@ export default class Character {
       this.right = state.right;
       this.run = state.run;
       this.touchGrace = state.touchGrace;
+      this.mouse = state.mouse;
+      this.isClicking = state.isClicking;
 
       const pressed = state.touchGrace && !this.prevTouchGrace;
       this.prevTouchGrace = state.touchGrace;
@@ -92,12 +95,6 @@ export default class Character {
       }
 
       if (this.animation.isLocked) return;
-
-      if (this.forward || this.backward) {
-        this.animation.play(this.run ? "running" : "walking");
-      } else {
-        this.animation.play("idle");
-      }
     });
   }
 
@@ -273,7 +270,6 @@ export default class Character {
     this.area.setFromObject(this.model);
 
     this.updateMovement(dt);
-    this.updateRotation();
     this.syncVisuals();
     this.updateFootsteps();
 
@@ -281,22 +277,72 @@ export default class Character {
   }
 
   updateMovement(dt) {
-    const rbRot = this.rigidBody.rotation();
-    const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(
-      new THREE.Quaternion(rbRot.x, rbRot.y, rbRot.z, rbRot.w),
-    );
+    console.log(this.mouse);
+    const vel = new THREE.Vector3();
 
-    const velocity = new THREE.Vector3();
+    const movement = {
+      x: 0,
+      z: 0,
+    };
 
-    if ((this.forward || this.backward) && !this.touchGrace) {
-      velocity.add(
-        forward.multiplyScalar(this.run ? this.runSpeed : this.walkSpeed),
-      );
+    vel.y = this.gravity;
+
+    let speed = this.run ? this.runSpeed : this.walkSpeed;
+
+    if (!this.touchGrace) {
+      if (this.forward) {
+        movement.z = 1;
+      }
+      if (this.backward) {
+        movement.z = -1;
+      }
+      if (this.isClicking) {
+        if (Math.abs(this.mouse.x) < 0.3) {
+          movement.x = 1;
+        }
+        if (Math.abs(this.mouse.x) > 0.7) {
+          movement.x = -this.mouse.x;
+        }
+        if (Math.abs(this.mouse.y) < 0.7) {
+          movement.z = this.mouse.y;
+        }
+        if (Math.abs(this.mouse.y) > 0.8) {
+          movement.z = -this.mouse.y;
+        }
+
+        // movement.z = this.mouse.y;
+        // if (Math.abs(movement.x) > 0.7 || Math.abs(movement.z) > 0.5) {
+        //   speed = this.runSpeed;
+        // }
+      }
+      if (this.left) {
+        movement.x = 1;
+      }
+      if (this.right) {
+        movement.x = -1;
+      }
     }
 
-    velocity.y = this.gravity;
+    if (movement.x !== 0 || movement.z !== 0) {
+      this.characterRotationTarget = Math.atan2(movement.x, movement.z);
+      vel.x = Math.sin(this.characterRotationTarget) * speed * -1;
+      vel.z = Math.cos(this.characterRotationTarget) * speed * -1;
+      if (speed === this.runSpeed) {
+        this.animation.play("running");
+      } else {
+        this.animation.play("walking");
+      }
+    } else {
+      this.animation.play("idle");
+    }
 
-    const frameMove = velocity.clone().multiplyScalar(dt);
+    this.instance.rotation.y = lerpAngle(
+      this.instance.rotation.y,
+      this.characterRotationTarget,
+      0.1,
+    );
+
+    const frameMove = vel.clone().multiplyScalar(dt);
     this.characterController.computeColliderMovement(this.collider, frameMove);
 
     const move = this.characterController.computedMovement();
@@ -306,63 +352,8 @@ export default class Character {
     );
   }
 
-  updateRotation() {
-    if (this.touchGrace) return;
-
-    let targetYaw = this.currentYaw;
-
-    if (this.left) targetYaw = Math.PI * 0.5;
-    if (this.right) targetYaw = -Math.PI * 0.5;
-    if (this.forward) targetYaw = 0;
-    if (this.backward) targetYaw = Math.PI;
-
-    this.currentYaw = lerpAngle(this.currentYaw, targetYaw, 0.1);
-
-    this.rigidBody.setRotation(
-      new THREE.Quaternion().setFromEuler(
-        new THREE.Euler(0, this.currentYaw, 0),
-      ),
-      true,
-    );
-    // if (this.touchGrace) return;
-    //
-    // let y = new THREE.Euler().setFromQuaternion(
-    //   new THREE.Quaternion(
-    //     this.rigidBody.rotation().x,
-    //     this.rigidBody.rotation().y,
-    //     this.rigidBody.rotation().z,
-    //     this.rigidBody.rotation().w,
-    //   ),
-    //   "XYZ",
-    // ).y;
-    //
-    // if (this.left) y = Math.PI * 0.5;
-    // if (this.right) y = -Math.PI * 0.5;
-    // if (this.backward) y = Math.PI;
-    //
-    // const lerpedAngle = lerpAngle(
-    //   new THREE.Euler().setFromQuaternion(
-    //     new THREE.Quaternion(
-    //       this.rigidBody.rotation().x,
-    //       this.rigidBody.rotation().y,
-    //       this.rigidBody.rotation().z,
-    //       this.rigidBody.rotation().w,
-    //     ),
-    //     "XYZ",
-    //   ).y,
-    //   y,
-    //   0.1,
-    // );
-    // this.rigidBody.setRotation(
-    //   new THREE.Quaternion().setFromEuler(new THREE.Euler(0, y, 0), true),
-    //   true,
-    // );
-    // this.rigidBody.setAngvel({ x: 0, y, z: 0 }, true);
-  }
-
   syncVisuals() {
     this.instance.position.copy(this.rigidBody.translation());
-    this.instance.quaternion.copy(this.rigidBody.rotation());
     this.camera.updateCamera(this.instance);
   }
 

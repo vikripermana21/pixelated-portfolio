@@ -49,31 +49,11 @@ export default class InputController {
   }
 
   onTouchMove(event) {
-    const x = event?.changedTouches?.[0]?.pageX;
-    const y = event?.changedTouches?.[0]?.pageY;
+    const x = event?.changedTouches?.[0]?.pageX / window.innerWidth;
+    const y = event?.changedTouches?.[0]?.pageY / window.innerHeight;
 
     if (this.isClicking) {
-      if (x / window.innerWidth < 0.3) {
-        inputStore.setState({ left: true, right: false });
-      } else if (x / window.innerWidth > 0.7) {
-        inputStore.setState({ right: true, left: false });
-      } else {
-        inputStore.setState({ right: false, left: false });
-      }
-
-      if (1.0 - y / window.innerHeight > 0.2) {
-        inputStore.setState({ forward: true });
-      } else {
-        inputStore.setState({ forward: false });
-      }
-      if (1.0 - y / window.innerHeight > 0.4) {
-        inputStore.setState({ run: true });
-      } else {
-        inputStore.setState({ run: false });
-      }
-      inputStore.setState({ mouse: event });
-    } else {
-      inputStore.setState({ forward: false, left: false, right: false });
+      inputStore.setState({ mouse: { x, y } });
     }
   }
 

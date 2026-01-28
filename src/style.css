@@ -1,21 +1,22 @@
 * {
-  margin: 0px !important;
-  padding: 0px !important;
+    margin: 0px !important;
+    padding: 0px !important;
 }
 
 .webgl {
-  position: fixed;
-  width: 100vw;
-  height: 100vh;
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    touch-action: none;
 }
 
 .text {
-  position: fixed;
-  width: 100vw;
-  height: 100vh;
-  z-index: 99;
-  color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    z-index: 99;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }

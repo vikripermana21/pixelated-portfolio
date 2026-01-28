@@ -48,6 +48,7 @@ export default class Character {
     this.walkSpeed = 10;
     this.runSpeed = 20;
     this.turnSpeed = 0.5;
+    this.currentYaw = 0;
     this.gravity = -9.81;
 
     // ---- Footstep state ----
@@ -92,7 +93,7 @@ export default class Character {
 
       if (this.animation.isLocked) return;
 
-      if (this.forward) {
+      if (this.forward || this.backward) {
         this.animation.play(this.run ? "running" : "walking");
       } else {
         this.animation.play("idle");
@@ -180,9 +181,7 @@ export default class Character {
     this.collider = this.physics.world.createCollider(colDesc, this.rigidBody);
 
     const pos = this.instance.getWorldPosition(new THREE.Vector3());
-    const rot = new THREE.Quaternion().setFromEuler(
-      new THREE.Euler(0, Math.PI * 0.25, 0),
-    );
+    const rot = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, 0));
     this.rigidBody.setTranslation(pos);
     this.rigidBody.setRotation(rot);
 
@@ -289,7 +288,7 @@ export default class Character {
 
     const velocity = new THREE.Vector3();
 
-    if (this.forward && !this.touchGrace) {
+    if ((this.forward || this.backward) && !this.touchGrace) {
       velocity.add(
         forward.multiplyScalar(this.run ? this.runSpeed : this.walkSpeed),
       );
@@ -310,42 +309,54 @@ export default class Character {
   updateRotation() {
     if (this.touchGrace) return;
 
-    let y = new THREE.Euler().setFromQuaternion(
-      new THREE.Quaternion(
-        this.rigidBody.rotation().x,
-        this.rigidBody.rotation().y,
-        this.rigidBody.rotation().z,
-        this.rigidBody.rotation().w,
-      ),
-      "XYZ",
-    ).y;
+    let targetYaw = this.currentYaw;
 
-    if (this.left) y += 1;
-    if (this.right) y -= 1;
+    if (this.left) targetYaw = Math.PI * 0.5;
+    if (this.right) targetYaw = -Math.PI * 0.5;
+    if (this.forward) targetYaw = 0;
+    if (this.backward) targetYaw = Math.PI;
+
+    this.currentYaw = lerpAngle(this.currentYaw, targetYaw, 0.1);
 
     this.rigidBody.setRotation(
       new THREE.Quaternion().setFromEuler(
-        new THREE.Euler(
-          0,
-          lerpAngle(
-            new THREE.Euler().setFromQuaternion(
-              new THREE.Quaternion(
-                this.rigidBody.rotation().x,
-                this.rigidBody.rotation().y,
-                this.rigidBody.rotation().z,
-                this.rigidBody.rotation().w,
-              ),
-              "XYZ",
-            ).y,
-            y,
-            0.1,
-          ),
-          0,
-        ),
-        true,
+        new THREE.Euler(0, this.currentYaw, 0),
       ),
       true,
     );
+    // if (this.touchGrace) return;
+    //
+    // let y = new THREE.Euler().setFromQuaternion(
+    //   new THREE.Quaternion(
+    //     this.rigidBody.rotation().x,
+    //     this.rigidBody.rotation().y,
+    //     this.rigidBody.rotation().z,
+    //     this.rigidBody.rotation().w,
+    //   ),
+    //   "XYZ",
+    // ).y;
+    //
+    // if (this.left) y = Math.PI * 0.5;
+    // if (this.right) y = -Math.PI * 0.5;
+    // if (this.backward) y = Math.PI;
+    //
+    // const lerpedAngle = lerpAngle(
+    //   new THREE.Euler().setFromQuaternion(
+    //     new THREE.Quaternion(
+    //       this.rigidBody.rotation().x,
+    //       this.rigidBody.rotation().y,
+    //       this.rigidBody.rotation().z,
+    //       this.rigidBody.rotation().w,
+    //     ),
+    //     "XYZ",
+    //   ).y,
+    //   y,
+    //   0.1,
+    // );
+    // this.rigidBody.setRotation(
+    //   new THREE.Quaternion().setFromEuler(new THREE.Euler(0, y, 0), true),
+    //   true,
+    // );
     // this.rigidBody.setAngvel({ x: 0, y, z: 0 }, true);
   }
 

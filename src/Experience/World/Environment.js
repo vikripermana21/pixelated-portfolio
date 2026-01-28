@@ -116,10 +116,10 @@ export default class Environment {
     this.directionalLight.shadow.normalBias = 0.02;
 
     this.scene.add(this.directionalLight);
-    this.directionalLightHelper = new THREE.DirectionalLightHelper(
-      this.directionalLight,
-    );
-    this.scene.add(this.directionalLightHelper);
+    // this.directionalLightHelper = new THREE.DirectionalLightHelper(
+    //   this.directionalLight,
+    // );
+    // this.scene.add(this.directionalLightHelper);
   }
 
   setPointLight() {

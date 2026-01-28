@@ -6,11 +6,14 @@ import { label } from "three/tsl";
 export default class Floor {
   constructor() {
     this.params = {
-      color: "#2e8b57",
+      color: "#5c9237",
       step: 10.0,
+      noiseStrength: 0.35,
+      noiseScale: 0.05,
     };
     this.experience = new Experience();
     this.world = this.experience.world;
+    this.time = this.experience.time;
     this.resources = this.experience.resources;
     this.debug = this.experience.debug;
     this.scene = this.experience.scene;
@@ -43,17 +46,32 @@ export default class Floor {
         max: 10,
         step: 1,
       });
+
+      this.tweaks.addBinding(this.params, "noiseScale", {
+        label: "Noise Scale",
+        min: 0,
+        max: 1,
+        step: 0.01,
+      });
+
+      this.tweaks.addBinding(this.params, "noiseStrength", {
+        label: "Noise Strength",
+        min: 0,
+        max: 1,
+        step: 0.01,
+      });
     }
   }
 
   setInstance() {
-    this.geo = new THREE.PlaneGeometry(300, 300);
+    this.geo = new THREE.BoxGeometry(300, 300, 2);
     this.mat = new FlexibleToonMaterial({
       color: new THREE.Color(this.params.color),
       isGrass: false,
       step: this.params.step,
     });
     this.instance = new THREE.Mesh(this.geo, this.mat);
+    this.instance.position.y = -1;
     this.instance.rotation.x = -Math.PI / 2;
     this.instance.receiveShadow = true;
     this.scene.add(this.instance);
@@ -63,8 +81,14 @@ export default class Floor {
 
   update() {
     this.mat.step = this.params.step;
+    this.mat.noiseScale = this.params.noiseScale;
+    this.mat.noiseStrength = this.params.noiseStrength;
+    this.mat.time = this.time.elapsed * 0.001;
     if (this.world) {
       this.world.grass.instance.material.step = this.params.step;
+      this.world.grass.instance.material.noiseScale = this.params.noiseScale;
+      this.world.grass.instance.material.noiseStrength =
+        this.params.noiseStrength;
       this.world.pillars.model.traverse((child) => {
         if (child instanceof THREE.Mesh) {
           child.material.step = this.params.step;

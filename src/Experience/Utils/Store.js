@@ -6,4 +6,7 @@ export const inputStore = createStore(() => ({
   left: false,
   right: false,
   run: false,
+  touchGrace: false,
+  isClicking: false,
+  mouse: {},
 }));

@@ -90,8 +90,8 @@ export default class Composer {
       this.scene,
       this.camera.instance,
     );
-    this.pixelatedPass.normalEdgeStrength = 2;
-    this.pixelatedPass.depthEdgeStrength = 2;
+    this.pixelatedPass.normalEdgeStrength = 1;
+    this.pixelatedPass.depthEdgeStrength = 1;
     this.instance.addPass(this.pixelatedPass);
 
     this.instance.addPass(this.mixPass);

@@ -20,3 +20,31 @@
     justify-content: center;
     align-items: center;
 }
+
+.loading-wrapper {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99;
+    color: white;
+}
+
+p {
+    opacity: 0;
+    margin-top: 100px !important;
+    font-weight: 500;
+    font-family: "Courier New", Courier, monospace;
+}
+.loading-bar {
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background: #ffffff;
+    transform: scaleX(0);
+    transform-origin: top left;
+    z-index: 100;
+}

@@ -34,7 +34,7 @@ float graceRing(float r, float angle, float timeOffset) {
     float wave = abs(r - radius);
 
     float ring = smoothstep(thickness, 0.0, wave);
-    ring *= exp(-r * 2.6);
+    ring *= exp(-r * 3.6);
 
     float swirl = noise(vec2(
                 angle * 3.0 * timeOffset + uTime * 1.2,
@@ -67,7 +67,7 @@ void main() {
 
     /* ---- Final intensity ---- */
     // float intensity = ring + halo;
-    float intensity = ring1 + ring2 + ring3;
+    float intensity = ring1 * 2.0+ ring2 * 2.0 + ring3 * 2.0;
 
     /* ---- Grace color ---- */
     vec3 color = uColor * intensity;

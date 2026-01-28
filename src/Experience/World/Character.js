@@ -55,6 +55,7 @@ export default class Character {
       this.left = state.left;
       this.right = state.right;
       this.run = state.run;
+      this.touchGrace = state.touchGrace;
 
       const pressed = state.touchGrace && !this.prevTouchGrace;
       this.prevTouchGrace = state.touchGrace;
@@ -62,10 +63,9 @@ export default class Character {
       if (pressed) {
         this.touchGrace = true;
 
-        this.animation.playChain(
-          ["kneeling", "standing"],
-          () => (this.touchGrace = false),
-        );
+        this.animation.playChain(["kneeling", "standing"], () => {
+          inputStore.setState({ touchGrace: false });
+        });
         return;
       }
 
@@ -114,6 +114,11 @@ export default class Character {
   initModel() {
     this.instance = new THREE.Group();
     this.model = this.resource.scene;
+    this.model.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        child.castShadow = true;
+      }
+    });
 
     this.instance.position.set(0, 5, 30);
     this.model.scale.setScalar(5);
@@ -130,9 +135,9 @@ export default class Character {
     this.rightFoot.add(this.rightFootProbe);
     this.leftFoot.add(this.leftFootProbe);
 
-    this.pointLight = new THREE.PointLight(0xffce3c, 200);
-    this.pointLight.position.set(1, 5, -3);
-    this.instance.add(this.pointLight);
+    // this.pointLight = new THREE.PointLight(0xffce3c, 200);
+    // this.pointLight.position.set(1, 5, -3);
+    // this.instance.add(this.pointLight);
   }
 
   createFootProbe() {

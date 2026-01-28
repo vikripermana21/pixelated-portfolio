@@ -3,6 +3,27 @@ import Experience from "../Experience";
 import FootstepBank from "../Utils/FootstepBank";
 import { inputStore } from "../Utils/Store";
 
+const normalizeAngle = (angle) => {
+  while (angle > Math.PI) angle -= 2 * Math.PI;
+  while (angle < -Math.PI) angle += 2 * Math.PI;
+  return angle;
+};
+
+const lerpAngle = (start, end, t) => {
+  start = normalizeAngle(start);
+  end = normalizeAngle(end);
+
+  if (Math.abs(end - start) > Math.PI) {
+    if (end > start) {
+      start += 2 * Math.PI;
+    } else {
+      end += 2 * Math.PI;
+    }
+  }
+
+  return normalizeAngle(start + (end - start) * t);
+};
+
 export default class Character {
   constructor() {
     this.experience = new Experience();
@@ -26,7 +47,7 @@ export default class Character {
     // ---- Movement tuning ----
     this.walkSpeed = 10;
     this.runSpeed = 20;
-    this.turnSpeed = 5.5;
+    this.turnSpeed = 0.5;
     this.gravity = -9.81;
 
     // ---- Footstep state ----
@@ -159,7 +180,9 @@ export default class Character {
     this.collider = this.physics.world.createCollider(colDesc, this.rigidBody);
 
     const pos = this.instance.getWorldPosition(new THREE.Vector3());
-    const rot = this.instance.getWorldQuaternion(new THREE.Quaternion());
+    const rot = new THREE.Quaternion().setFromEuler(
+      new THREE.Euler(0, Math.PI * 0.25, 0),
+    );
     this.rigidBody.setTranslation(pos);
     this.rigidBody.setRotation(rot);
 
@@ -287,11 +310,43 @@ export default class Character {
   updateRotation() {
     if (this.touchGrace) return;
 
-    let y = 0;
-    if (this.left) y = this.turnSpeed;
-    if (this.right) y = -this.turnSpeed;
+    let y = new THREE.Euler().setFromQuaternion(
+      new THREE.Quaternion(
+        this.rigidBody.rotation().x,
+        this.rigidBody.rotation().y,
+        this.rigidBody.rotation().z,
+        this.rigidBody.rotation().w,
+      ),
+      "XYZ",
+    ).y;
 
-    this.rigidBody.setAngvel({ x: 0, y, z: 0 }, true);
+    if (this.left) y += 1;
+    if (this.right) y -= 1;
+
+    this.rigidBody.setRotation(
+      new THREE.Quaternion().setFromEuler(
+        new THREE.Euler(
+          0,
+          lerpAngle(
+            new THREE.Euler().setFromQuaternion(
+              new THREE.Quaternion(
+                this.rigidBody.rotation().x,
+                this.rigidBody.rotation().y,
+                this.rigidBody.rotation().z,
+                this.rigidBody.rotation().w,
+              ),
+              "XYZ",
+            ).y,
+            y,
+            0.1,
+          ),
+          0,
+        ),
+        true,
+      ),
+      true,
+    );
+    // this.rigidBody.setAngvel({ x: 0, y, z: 0 }, true);
   }
 
   syncVisuals() {

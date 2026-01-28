@@ -7,7 +7,7 @@ export default class Grass {
     this.params = {
       color: "#5c9237",
     };
-    this.count = 100000;
+    this.count = 100;
     this.experience = new Experience();
     this.scene = this.experience.scene;
     this.time = this.experience.time;

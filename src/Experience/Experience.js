@@ -1,16 +1,18 @@
+import * as THREE from "three";
+import Stats from "three/examples/jsm/libs/stats.module.js";
 import Camera from "./Camera";
+import Composer from "./Composer";
 import Renderer from "./Renderer";
+import sources from "./sources";
+import InputController from "./UI/InputController";
+import Debug from "./Utils/Debug";
 import Resources from "./Utils/Resources";
 import Sizes from "./Utils/Sizes";
 import Time from "./Utils/Time";
-import * as THREE from "three";
 import World from "./World/World";
-import sources from "./sources";
-import Debug from "./Utils/Debug";
-import Composer from "./Composer";
-import Physics from "./World/Physics";
-import InputController from "./UI/InputController";
-import Stats from "three/examples/jsm/libs/stats.module.js";
+import nipplejs from "nipplejs";
+import { inputStore } from "./Utils/Store";
+import JoystickController from "./UI/JoystickController";
 
 let instance;
 export default class Experience {
@@ -33,6 +35,7 @@ export default class Experience {
 
     this.debug = new Debug();
     this.inputController = new InputController();
+    this.joystickController = new JoystickController();
     this.sizes = new Sizes();
     this.time = new Time();
     this.scene = new THREE.Scene();
@@ -60,6 +63,7 @@ export default class Experience {
     this.stats.begin();
     this.camera.update();
     this.world.update();
+    this.joystickController.update();
     this.composer.update();
     this.stats.end();
   }

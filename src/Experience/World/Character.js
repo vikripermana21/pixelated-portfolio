@@ -105,23 +105,9 @@ export default class Character {
   async initSound() {
     this.listener = new THREE.AudioListener();
     this.camera.instance.add(this.listener);
-
-    this.audioLoader = new THREE.AudioLoader();
-    const buffers = await Promise.all(
-      [
-        "/audio/grass_walk_1.wav",
-        "/audio/grass_walk_2.wav",
-        "/audio/grass_walk_3.wav",
-        "/audio/grass_walk_4.wav",
-        "/audio/grass_walk_5.wav",
-        "/audio/grass_walk_6.wav",
-      ].map(
-        (path) =>
-          new Promise((resolve) =>
-            this.audioLoader.load(path, (buffer) => resolve(buffer)),
-          ),
-      ),
-    );
+    const buffers = Object.keys(this.resources.items)
+      .filter((item) => item.includes("grassWalk"))
+      .map((item) => this.resources.items[item]);
 
     this.audio = new FootstepBank(this.listener, buffers);
   }

@@ -1,7 +1,9 @@
 * {
+    touch-action: none;
+}
+body {
     margin: 0px !important;
     padding: 0px !important;
-    touch-action: none;
 }
 
 .webgl {
@@ -47,4 +49,7 @@ p {
     transform: scaleX(0);
     transform-origin: top left;
     z-index: 100;
+}
+.tp-dfwv {
+    z-index: 1000;
 }

@@ -277,7 +277,6 @@ export default class Character {
   }
 
   updateMovement(dt) {
-    console.log(this.mouse);
     const vel = new THREE.Vector3();
 
     const movement = {
@@ -295,25 +294,6 @@ export default class Character {
       }
       if (this.backward) {
         movement.z = -1;
-      }
-      if (this.isClicking) {
-        if (Math.abs(this.mouse.x) < 0.3) {
-          movement.x = 1;
-        }
-        if (Math.abs(this.mouse.x) > 0.7) {
-          movement.x = -this.mouse.x;
-        }
-        if (Math.abs(this.mouse.y) < 0.7) {
-          movement.z = this.mouse.y;
-        }
-        if (Math.abs(this.mouse.y) > 0.8) {
-          movement.z = -this.mouse.y;
-        }
-
-        // movement.z = this.mouse.y;
-        // if (Math.abs(movement.x) > 0.7 || Math.abs(movement.z) > 0.5) {
-        //   speed = this.runSpeed;
-        // }
       }
       if (this.left) {
         movement.x = 1;

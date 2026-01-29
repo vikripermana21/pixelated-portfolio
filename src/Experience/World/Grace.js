@@ -5,22 +5,28 @@ import vertexShader from "../Shaders/Grace/grace.vert";
 import fragmentShader from "../Shaders/Grace/grace.frag";
 import gsap from "gsap";
 import { inputStore } from "../Utils/Store";
+import FootstepBank from "../Utils/FootstepBank";
 
 export default class Grace {
   constructor() {
-    this.sound = new Audio("/audio/grace.mp3");
-    this.sound.volume = 0.7;
     this.params = {
       uColor: "#ffce3c",
     };
     this.experience = new Experience();
     this.scene = this.experience.scene;
+    this.resources = this.experience.resources;
     this.world = this.experience.world;
     this.time = this.experience.time;
     this.camera = this.experience.camera;
     this.debug = this.experience.debug;
     this.sizes = this.experience.sizes;
     this.area = new THREE.Box3();
+
+    this.listener = new THREE.AudioListener();
+    this.camera.instance.add(this.listener);
+    this.audio = new FootstepBank(this.listener, [
+      this.resources.items.graceSound,
+    ]);
 
     inputStore.subscribe((state) => {
       this.touched = state.touchGrace;
@@ -33,7 +39,7 @@ export default class Grace {
   touch() {
     setTimeout(() => {
       if (!this.plane) {
-        this.sound.play();
+        this.audio.play(this.instance);
         this.setLight();
       }
     }, 2000);
